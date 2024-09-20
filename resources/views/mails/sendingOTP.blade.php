@@ -153,47 +153,6 @@
 							</tr>
 						</tbody>
 					</table>
-					<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2"
-						role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-						<tbody>
-							<tr>
-								<td>
-									<table align="center" border="0" cellpadding="0" cellspacing="0"
-										class="row-content stack" role="presentation"
-										style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f8fbf7; color: #000000; width: 600px; margin: 0 auto;"
-										width="600">
-										<tbody>
-											<tr>
-												<td class="column column-1"
-													style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; background-color: #f8fbf7; padding-left: 20px; padding-right: 20px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-													width="100%">
-													<table border="0" cellpadding="15" cellspacing="0"
-														class="image_block block-1" role="presentation"
-														style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-														width="100%">
-														<tr>
-															<td class="pad">
-																<div align="center" class="alignment"
-																	style="line-height:10px">
-																	<div style="max-width: 84px;"><a
-																			href="https://rskasihibu.com/"
-																			style="outline:none" tabindex="-1"
-																			target="_blank"><img height="auto"
-																				src={{ asset('mails/images/image_2.png') }}
-																				style="display: block; height: auto; border: 0; width: 100%;"
-																				width="84" /></a></div>
-																</div>
-															</td>
-														</tr>
-													</table>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</td>
-							</tr>
-						</tbody>
-					</table>
 					<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
 						role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
 						<tbody>
@@ -277,7 +236,7 @@
 																		Sistem Pemantau Suara. Gunakan OTP berikut ini untuk
 																		menyetel ulang kata sandi anda. OTP berlaku
 																		selama 20 menit. Jangan bagikan kode OTP ini
-																		kepada siapapun termasuk Admin Personalia.</p>
+																		kepada siapapun termasuk Penanggung Jawab Sistem Pemantau Suara.</p>
 																</div>
 															</td>
 														</tr>
@@ -332,6 +291,30 @@
 															</td>
 														</tr>
 													</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1"
+						role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+						<tbody>
+							<tr>
+								<td>
+									<table align="center" border="0" cellpadding="0" cellspacing="0"
+										class="row-content stack" role="presentation"
+										style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #201f42; color: #000000; width: 600px; margin: 0 auto;"
+										width="600">
+										<tbody>
+											<tr>
+												<td class="column column-1"
+													style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+													width="100%">
+													<div class="spacer_block block-1"
+														style="height:6px;line-height:6px;font-size:1px;"> </div>
 												</td>
 											</tr>
 										</tbody>

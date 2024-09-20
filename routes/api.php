@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\Publik\Auth\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Publik\Auth\LoginController;
+use App\Http\Controllers\Publik\Auth\ResetPasswordController;
+use App\Http\Controllers\Publik\Auth\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/forgot-password-sendOtp', [ForgotPasswordController::class, 'sendOtp']);
+Route::post('/forgot-password-verifyOtp', [ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logout', [LoginController::class, 'logout'])->middleware('web');
