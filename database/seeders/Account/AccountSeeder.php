@@ -16,7 +16,7 @@ class AccountSeeder extends Seeder
     {
         $roleSuperAdmin = User::create([
             'nama' => 'Super Admin',
-            'username' => 'super.admin',
+            'email' => 'super.admin@gmail.com',
             'role_id' => 1,
             'password' => Hash::make('SAP_super_admin_password'),
         ]);
@@ -24,7 +24,7 @@ class AccountSeeder extends Seeder
 
         $roleAdmin = User::create([
             'nama' => 'Penanggung Jawab',
-            'username' => 'tanggung.jawab.pelaksana',
+            'email' => 'tanggung.jawab.pelaksana@gmail.com',
             'role_id' => 2,
             'password' => Hash::make('SAP_super_admin_password'),
         ]);
@@ -32,7 +32,7 @@ class AccountSeeder extends Seeder
 
         $rolePelaksana = User::create([
             'nama' => 'Pelaksana',
-            'username' => 'pelaksana',
+            'email' => 'pelaksana@gmail.com',
             'role_id' => 3,
             'password' => Hash::make('SAP_super_admin_password'),
         ]);

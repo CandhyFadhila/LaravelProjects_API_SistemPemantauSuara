@@ -18,10 +18,10 @@ class LoginController extends Controller
     {
         $credentials = $request->validated();
 
-        $user = User::where('username', $credentials['username'])->first();
+        $user = User::where('email', $credentials['email'])->first();
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            Log::error("Login failed for username: {$credentials['username']} - Invalid credentials.");
-            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Username atau password Anda tidak valid, silakan periksa kembali dan lakukan login ulang.'), Response::HTTP_BAD_REQUEST);
+            Log::error("Login failed for email: {$credentials['email']} - Invalid credentials.");
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Email atau password Anda tidak valid, silakan periksa kembali dan lakukan login ulang.'), Response::HTTP_BAD_REQUEST);
         }
 
         Log::info("Login successful for user ID: {$user->id}, Name: {$user->nama}.");
@@ -39,7 +39,7 @@ class LoginController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'nama' => $user->nama,
-                    'username' => $user->username,
+                    'email' => $user->email,
                     'foto_profil' => $user->foto_profil,
                     'role' => $role ? [
                         'id' => $role->id,
@@ -69,7 +69,7 @@ class LoginController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'nama' => $user->nama,
-                    'username' => $user->username,
+                    'email' => $user->email,
                     'foto_profil' => $user->foto_profil,
                     'role' => $role ? [
                         'id' => $role->id,
