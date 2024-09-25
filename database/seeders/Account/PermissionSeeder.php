@@ -14,8 +14,8 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'Pengaturan Role' => ['create role', 'edit role', 'view role'],
-            'Pengaturan Permission' => ['edit permission', 'delete permission', 'view permission'],
+            'Manajemen Pengguna' => ['create pengguna', 'edit pengguna', 'delete pengguna', 'view pengguna'],
+            'Manajemen Aktivitas' => ['create aktivitas', 'edit aktivitas', 'delete aktivitas', 'view aktivitas'],
         ];
 
         foreach ($permissions as $group => $perms) {

@@ -18,8 +18,6 @@ use App\Http\Controllers\Publik\Auth\ForgotPasswordController;
 */
 
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/forgot-password-sendOtp', [ForgotPasswordController::class, 'sendOtp']);
-Route::post('/forgot-password-verifyOtp', [ForgotPasswordController::class, 'verifyOtp']);
 Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {

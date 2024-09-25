@@ -3,11 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -43,6 +44,17 @@ class User extends Authenticatable
         'id' => 'integer',
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'role_id' => 'integer'
+        'role_id' => 'integer',
+        'status_aktif' => 'integer',
     ];
+
+    /**
+     * Get all of the aktivitas_users for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aktivitas_users(): HasMany
+    {
+        return $this->hasMany(AktivitasPelaksana::class, 'pelaksana_id', 'id');
+    }
 }

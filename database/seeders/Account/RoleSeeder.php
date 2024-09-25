@@ -4,6 +4,7 @@ namespace Database\Seeders\Account;
 
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use App\Helpers\PermissionHelper;
 use Spatie\Permission\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -24,28 +25,6 @@ class RoleSeeder extends Seeder
             'updated_at' => $updated_at,
         ]);
 
-        Role::create([
-            'name' => 'Penanggung Jawab',
-            'deskripsi' => 'Ini adalah role Admin yang menjadi penganggung jawab',
-            'created_at' => $created_at,
-            'updated_at' => $updated_at,
-        ]);
-
-        Role::create([
-            'name' => 'Pelaksana',
-            'deskripsi' => 'Ini adalah role User yang menjadi pelaksanan tiap kecamatan kota semarang',
-            'created_at' => $created_at,
-            'updated_at' => $updated_at,
-        ]);
-
-        $roleSuperAdmin->givePermissionTo([
-            'create role',
-            'edit role',
-            'view role',
-
-            'edit permission',
-            'delete permission',
-            'view permission'
-        ]);
+        $roleSuperAdmin->givePermissionTo(PermissionHelper::getPermissionsByRole(1));
     }
 }

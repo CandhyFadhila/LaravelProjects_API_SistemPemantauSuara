@@ -17,7 +17,7 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users,email',
+            'username' => 'required|exists:users,username',
             'kode_otp' => 'required|numeric|digits:6',
             'password' => 'required|min:4|confirmed',
             'password_confirmation' => 'required|min:4',
@@ -27,8 +27,7 @@ class ResetPasswordRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => 'Email tidak diperbolehkan kosong.',
-            'email.email' => 'Email yang valid hanya diperbolehkan menggunakan format email.',
+            'username.required' => 'Email tidak diperbolehkan kosong.',
             'email.exists' => 'Email yang diberikan tidak terdaftar di sistem Pemantau Suara.',
             'password.required' => 'Kata sandi tidak diperbolehkan kosong.',
             'password.min' => 'Kata sandi minimal terdiri dari 4 karakter.',
