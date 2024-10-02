@@ -13,8 +13,10 @@ class AktivitasPelaksana extends Model
     protected $guarded = ['id'];
     protected $casts = [
         'id' => 'integer',
-        'pelaksana_id' => 'integer',
-        'status_aktivitas_id' => 'integer',
+        'pelaksana' => 'integer',
+        'status_aktivitas' => 'integer',
+        'kelurahan' => 'integer',
+        'rw' => 'integer',
     ];
 
     /**
@@ -24,7 +26,7 @@ class AktivitasPelaksana extends Model
      */
     public function pelaksana_users(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'pelaksana_id', 'id');
+        return $this->belongsTo(User::class, 'pelaksana', 'id');
     }
 
     /**
@@ -34,6 +36,16 @@ class AktivitasPelaksana extends Model
      */
     public function status_aktivitas(): BelongsTo
     {
-        return $this->belongsTo(StatusAktivitas::class, 'status_aktivitas_id', 'id');
+        return $this->belongsTo(StatusAktivitas::class, 'status_aktivitas', 'id');
+    }
+
+    /**
+     * Get the kelurahans that owns the AktivitasPelaksana
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function kelurahans(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan', 'id');
     }
 }

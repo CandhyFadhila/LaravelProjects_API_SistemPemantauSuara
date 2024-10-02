@@ -25,7 +25,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
+            'username' => 'required',
             'password' => 'required|min:4'
         ];
     }
@@ -33,8 +33,7 @@ class LoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => 'Silahkan masukkan email anda terlebih dahulu.',
-            'email.email' => 'Format email yang diperbolehkan menggunakan @gmail atau yang lainnya.',
+            'username.required' => 'Silahkan masukkan username anda terlebih dahulu.',
             'password.required' => 'Kolom password tidak diperbolehkan kosong.',
             'password.min' => 'Minimum password yang diperbolehkan 4 karakter.',
         ];

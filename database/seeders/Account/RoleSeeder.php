@@ -24,7 +24,22 @@ class RoleSeeder extends Seeder
             'created_at' => $created_at,
             'updated_at' => $updated_at,
         ]);
-
         $roleSuperAdmin->givePermissionTo(PermissionHelper::getPermissionsByRole(1));
+
+        $rolePJ = Role::create([
+            'name' => 'Penanggung Jawab',
+            'deskripsi' => 'Ini adalah role penanggung jawab',
+            'created_at' => $created_at,
+            'updated_at' => $updated_at,
+        ]);
+        $rolePJ->givePermissionTo(PermissionHelper::getPermissionsByRole(2));
+
+        $rolePelaksana = Role::create([
+            'name' => 'Pelaksana',
+            'deskripsi' => 'Ini adalah role pelaksana',
+            'created_at' => $created_at,
+            'updated_at' => $updated_at,
+        ]);
+        $rolePelaksana->givePermissionTo(PermissionHelper::getPermissionsByRole(3));
     }
 }

@@ -8,14 +8,39 @@ class PermissionHelper
 	{
 		$permissions = [
 			1 => [
+				'view publikRequest',
 				'create pengguna',
 				'edit pengguna',
 				'delete pengguna',
 				'view pengguna',
+				'import pengguna',
+				'export pengguna',
 				'create aktivitas',
 				'edit aktivitas',
 				'delete aktivitas',
-				'view aktivitas'
+				'view aktivitas',
+				'import aktivitas',
+				'export aktivitas'
+			],
+			2 => [
+				'view publikRequest',
+				'create pengguna',
+				'edit pengguna',
+				'view pengguna',
+				'create aktivitas',
+				'edit aktivitas',
+				'delete aktivitas',
+				'view aktivitas',
+				'import aktivitas',
+				'export aktivitas',
+			],
+			3 => [
+				'view publikRequest',
+				'create aktivitas',
+				'edit aktivitas',
+				'delete aktivitas',
+				'view aktivitas',
+				'export aktivitas'
 			]
 		];
 

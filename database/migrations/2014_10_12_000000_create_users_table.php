@@ -14,15 +14,18 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            // $table->string('email')->unique()->nullable();
             $table->string('username')->unique();
+            $table->string('nik_ktp', 16)->nullable(); // wajib
             $table->string('foto_profil')->nullable();
-            $table->integer('role_id');
+            $table->string('no_hp', 50)->nullable(); // wajib
+            $table->string('tgl_diangkat')->nullable();
+            $table->boolean('jenis_kelamin'); // 1 = laki-laki, 0 = perempuan
+            $table->foreignId('role_id')->nullable();
             $table->boolean('status_aktif')->default(true); // 0 = non aktif, 1 = aktif
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            // $table->timestamp('remember_token_expired_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

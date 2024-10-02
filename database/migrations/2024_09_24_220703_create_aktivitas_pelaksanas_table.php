@@ -13,14 +13,16 @@ return new class extends Migration
     {
         Schema::create('aktivitas_pelaksanas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pelaksana_id')->constrained('users');
+            $table->foreignId('pelaksana')->constrained('users');
             $table->string('nama_aktivitas');
-            $table->foreignId('status_aktivitas_id')->constrained('status_aktivitas');
+            $table->foreignId('status_aktivitas')->constrained('status_aktivitas');
             $table->text('deskripsi')->nullable();
             $table->string('tgl_mulai');
             $table->string('tgl_selesai');
             $table->string('tempat_aktivitas');
             $table->string('foto_aktivitas');
+            $table->integer('rw');
+            $table->foreignId('kelurahan')->constrained('kelurahans');
             $table->timestamps();
         });
     }

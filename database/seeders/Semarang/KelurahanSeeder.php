@@ -17,6 +17,8 @@ class KelurahanSeeder extends Seeder
         foreach ($kelurahanData as $kelurahan) {
             DB::table('kelurahans')->insert([
                 'nama_kelurahan' => $kelurahan['nama_kelurahan'],
+                'kode_kelurahan' => $kelurahan['kode_kelurahan'],
+                'max_rw' => $kelurahan['max_rw'],
                 'provinsi_id' => 1,
                 'kabupaten_id' => 1,
                 'kecamatan_id' => $kelurahan['kecamatan_id'],

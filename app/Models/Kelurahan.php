@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -13,6 +14,7 @@ class Kelurahan extends Model
     protected $guarded = ['id'];
     protected $casts = [
         'id' => 'integer',
+        'max_rw' => 'integer',
         'provinsi_id' => 'integer',
         'kabupaten_id' => 'integer',
         'kecamatan_id' => 'integer',
@@ -46,5 +48,15 @@ class Kelurahan extends Model
     public function kecamatans(): BelongsTo
     {
         return $this->belongsTo(Kecamatan::class, 'kecamatan_id', 'id');
+    }
+
+    /**
+     * Get all of the aktivitas_pelaksanas for the Kelurahan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function aktivitas_pelaksanas(): HasMany
+    {
+        return $this->hasMany(AktivitasPelaksana::class, 'kelurahan', 'id');
     }
 }

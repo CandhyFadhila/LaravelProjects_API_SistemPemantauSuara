@@ -18,10 +18,10 @@ class LoginController extends Controller
     {
         $credentials = $request->validated();
 
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('username', $credentials['username'])->first();
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            Log::error("Login failed for email: {$credentials['email']} - Invalid credentials.");
-            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Email atau password Anda tidak valid, silakan periksa kembali dan lakukan login ulang.'), Response::HTTP_BAD_REQUEST);
+            Log::error("Login failed for username: {$credentials['username']} - Invalid credentials.");
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Username atau password Anda tidak valid, silakan periksa kembali dan lakukan login ulang.'), Response::HTTP_BAD_REQUEST);
         }
 
         Log::info("Login successful for user ID: {$user->id}, Name: {$user->nama}.");
@@ -39,8 +39,12 @@ class LoginController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'nama' => $user->nama,
-                    'email' => $user->email,
-                    'foto_profil' => $user->foto_profil,
+                    'username' => $user->username,
+                    'jenis_kelamin' => $user->jenis_kelamin,
+                    'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
+                    'nik_ktp' => $user->nik_ktp,
+                    'no_hp' => $user->no_hp ?? null,
+                    'tgl_diangkat' => $user->tgl_diangkat,
                     'role' => $role ? [
                         'id' => $role->id,
                         'name' => $role->name,
@@ -49,6 +53,7 @@ class LoginController extends Controller
                         'updated_at' => $role->updated_at,
                     ] : null,
                     'is_admin' => $isAdmin,
+                    'status_aktif' => $user->status_aktif,
                     'permission' => $role ? $role->permissions->pluck('id') : [],
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
@@ -64,13 +69,17 @@ class LoginController extends Controller
         $role = $user->roles->first();
         return response()->json([
             'status' => Response::HTTP_OK,
-            'message' => "Login berhasil! Selamat datang '{$user->nama}'.",
+            'message' => "Berhasil menampilkan detail akun '{$user->nama}'.",
             'data' => [
                 'user' => [
                     'id' => $user->id,
                     'nama' => $user->nama,
-                    'email' => $user->email,
-                    'foto_profil' => $user->foto_profil,
+                    'username' => $user->username,
+                    'jenis_kelamin' => $user->jenis_kelamin,
+                    'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
+                    'nik_ktp' => $user->nik_ktp,
+                    'no_hp' => $user->no_hp ?? null,
+                    'tgl_diangkat' => $user->tgl_diangkat,
                     'role' => $role ? [
                         'id' => $role->id,
                         'name' => $role->name,
@@ -78,6 +87,7 @@ class LoginController extends Controller
                         'created_at' => $role->created_at,
                         'updated_at' => $role->updated_at,
                     ] : null,
+                    'status_aktif' => $user->status_aktif,
                     'permission' => $role ? $role->permissions->pluck('id') : [],
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
