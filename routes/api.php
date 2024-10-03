@@ -52,8 +52,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
             Route::post('/get-aktivitas', [AktivitasController::class, 'index']);
             Route::get('/export-aktivitas', [AktivitasController::class, 'exportAktivitas']);
-            Route::post('/import-pengguna', [AktivitasController::class, 'importPengguna']);
+            Route::post('/import-aktivitas', [AktivitasController::class, 'importAktivitas']);
             Route::apiResource('/aktivitas', AktivitasController::class);
+        });
+
+        // ! Monitoring Suara
+        Route::prefix('monitoring-suara')->group(function () {
+            Route::get('/account-info', [LoginController::class, 'getInfoUserLogin']);
+            Route::post('/activate-pengguna/{id}', [PenggunaController::class, 'toggleStatusUser']);
+            Route::post('/reset-password-pengguna', [PenggunaController::class, 'resetPasswordPengguna']);
         });
     });
 });

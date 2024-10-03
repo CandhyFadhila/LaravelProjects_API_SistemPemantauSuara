@@ -34,6 +34,8 @@ class DatabaseSeeder extends Seeder
             KecamatanSeeder::class,
             KelurahanSeeder::class,
 
+            PartaiSeeder::class,
+
             StatusAktivitasSeeder::class,
             AktivitasPelaksanaSeeder::class,
         ]);

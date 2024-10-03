@@ -59,4 +59,14 @@ class Kelurahan extends Model
     {
         return $this->hasMany(AktivitasPelaksana::class, 'kelurahan', 'id');
     }
+
+    /**
+     * Get all of the suara_kpus for the Kelurahan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function suara_kpus(): HasMany
+    {
+        return $this->hasMany(SuaraKPU::class, 'kelurahan_id', 'id');
+    }
 }
