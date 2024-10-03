@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Helpers\FileUploadHelper;
@@ -9,10 +10,14 @@ use App\Models\AktivitasPelaksana;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Aktivitas\AktivitasExport;
 use App\Helpers\Filters\AktivitasFilterHelper;
+use App\Http\Requests\Aktivitas\ImportAktivitasRequest;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\Aktivitas\StoreAktivitasPelaksanaRequest;
 use App\Http\Requests\Aktivitas\UpdateAktivitasPelaksanaRequest;
+use App\Imports\Aktivitas\AktivitasImport;
 
 class AktivitasController extends Controller
 {
@@ -81,8 +86,18 @@ class AktivitasController extends Controller
                     'tgl_mulai' => $aktivitas->tgl_mulai,
                     'tgl_selesai' => $aktivitas->tgl_selesai,
                     'tempat_aktivitas' => $aktivitas->tempat_aktivitas,
-                    'foto_aktivitas' => $aktivitas->foto_aktivitas,
-                    'kelurahan' => $aktivitas->kelurahans,
+                    'foto_aktivitas' => $aktivitas->foto_aktivitas ? env('STORAGE_SERVER_DOMAIN') . $aktivitas->foto_aktivitas : null,
+                    'kelurahan' => $aktivitas->kelurahans ? [
+                        'id' => $aktivitas->kelurahans->id,
+                        'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
+                        'max_rw' => $aktivitas->kelurahans->max_rw,
+                        'kecamatan' => $aktivitas->kelurahans->kecamatans,
+                        'kabupaten' => $aktivitas->kelurahans->kabupaten_kotas,
+                        'provinsi' => $aktivitas->kelurahans->provinsis,
+                        'created_at' => $aktivitas->kelurahans->created_at,
+                        'updated_at' => $aktivitas->kelurahans->updated_at
+                    ] : null,
                     'created_at' => $aktivitas->created_at,
                     'updated_at' => $aktivitas->updated_at,
                 ];
@@ -132,9 +147,10 @@ class AktivitasController extends Controller
                 'kelurahan' => $validatedData['kelurahan_id'],
             ]);
 
+            $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_CREATED,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' berhasil dibuat dan dilaksanakan pada '{$aktivitas->tgl_mulai}'.",
+                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil ditambahkan.",
                 'data' => $aktivitas
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -149,13 +165,11 @@ class AktivitasController extends Controller
     public function show($id)
     {
         try {
-            // Cek hak akses
             if (!Gate::allows('view aktivitas')) {
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
-            // Temukan aktivitas berdasarkan ID
-            $aktivitas = AktivitasPelaksana::with(['pelaksana_users', 'status_aktivitas', 'kelurahans'])->find($id);
+            $aktivitas = AktivitasPelaksana::find($id);
 
             if (!$aktivitas) {
                 return response()->json([
@@ -181,17 +195,12 @@ class AktivitasController extends Controller
                     'foto_profil' =>  $aktivitas->pelaksana_users->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $aktivitas->pelaksana_users->foto_profil : null,
                     'tgl_diangkat' => $aktivitas->pelaksana_users->tgl_diangkat,
                     'jenis_kelamin' => $aktivitas->pelaksana_users->jenis_kelamin,
-                    'role' => $aktivitas->pelaksana_users->roles->first() ? $aktivitas->pelaksana_users->roles->first()->name : null,
+                    'role' => $aktivitas->pelaksana_users->roles->first() ? $aktivitas->pelaksana_users->roles->first() : null,
                     'status_aktif' => $aktivitas->pelaksana_users->status_aktif,
                     'created_at' => $aktivitas->pelaksana_users->created_at,
                     'updated_at' => $aktivitas->pelaksana_users->updated_at
                 ] : null,
-                'status_aktivitas' => $aktivitas->status_aktivitas ? [
-                    'id' => $aktivitas->status_aktivitas->id,
-                    'label' => $aktivitas->status_aktivitas->label,
-                    'created_at' => $aktivitas->status_aktivitas->created_at,
-                    'updated_at' => $aktivitas->status_aktivitas->updated_at
-                ] : null,
+                'status_aktivitas' => $aktivitas->status,
                 'rw' => $aktivitas->rw,
                 'kelurahan' => $aktivitas->kelurahans ? [
                     'id' => $aktivitas->kelurahans->id,
@@ -199,7 +208,7 @@ class AktivitasController extends Controller
                     'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
                     'max_rw' => $aktivitas->kelurahans->max_rw,
                     'provinsi_id' => $aktivitas->kelurahans->provinsis,
-                    'kabupaten_id' => $aktivitas->kelurahans->kabupatens,
+                    'kabupaten_id' => $aktivitas->kelurahans->kabupaten_kotas,
                     'kecamatan_id' => $aktivitas->kelurahans->kecamatans,
                     'created_at' => $aktivitas->kelurahans->created_at,
                     'updated_at' => $aktivitas->kelurahans->updated_at
@@ -207,10 +216,10 @@ class AktivitasController extends Controller
                 'created_at' => $aktivitas->created_at,
                 'updated_at' => $aktivitas->updated_at,
             ];
-
+            $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Detail aktivitas '{$aktivitas->nama_aktivitas}' berhasil ditampilkan.",
+                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil ditampilkan.",
                 'data' => $formattedData,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -257,10 +266,10 @@ class AktivitasController extends Controller
             }
 
             $aktivitas->save();
-
+            $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' berhasil diperbarui.",
+                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil diperbarui.",
                 'data' => $aktivitas
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -288,13 +297,66 @@ class AktivitasController extends Controller
             }
 
             $aktivitas->delete();
-
+            $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' berhasil dihapus.",
+                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil dihapus.",
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('| Aktivitas | - Error function destroy: ' . $e->getMessage());
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function exportAktivitas(Request $request)
+    {
+        try {
+            if (!Gate::allows('export aktivitas')) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+            }
+
+            $data_aktivitas = AktivitasPelaksana::all();
+            if ($data_aktivitas->isEmpty()) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data pengguna yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
+            }
+
+            try {
+                return Excel::download(new AktivitasExport($request->all()), 'data-aktivitas.xls');
+            } catch (\Throwable $e) {
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Maaf sepertinya terjadi kesalahan.'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Data pengguna berhasil di download.'), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('| Aktivitas | - Error function exportPengguna: ' . $e->getMessage());
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function importAktivitas(ImportAktivitasRequest $request)
+    {
+        try {
+            if (!Gate::allows('import aktivitas')) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+            }
+
+            $file = $request->validated();
+
+            try {
+                Excel::import(new AktivitasImport, $file['aktivitas_file']);
+            } catch (\Exception $e) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Maaf sepertinya terjadi kesalahan.' . $e->getMessage()), Response::HTTP_NOT_ACCEPTABLE);
+            }
+
+            return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Data aktivitas berhasil di import kedalam database.'), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('| Aktivitas | - Error function importAktivitas: ' . $e->getMessage());
             return response()->json([
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',

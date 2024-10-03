@@ -9,9 +9,10 @@ class PermissionHelper
 		$permissions = [
 			1 => [
 				'view publikRequest',
+				'aktifkan pengguna',
+				'reset password',
 				'create pengguna',
 				'edit pengguna',
-				'delete pengguna',
 				'view pengguna',
 				'import pengguna',
 				'export pengguna',
@@ -24,6 +25,8 @@ class PermissionHelper
 			],
 			2 => [
 				'view publikRequest',
+				'aktifkan pengguna',
+				// 'reset password',
 				'create pengguna',
 				'edit pengguna',
 				'view pengguna',
@@ -40,6 +43,7 @@ class PermissionHelper
 				'edit aktivitas',
 				'delete aktivitas',
 				'view aktivitas',
+				'import aktivitas',
 				'export aktivitas'
 			]
 		];

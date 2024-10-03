@@ -51,8 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::apiResource('/pengguna', PenggunaController::class);
 
             Route::post('/get-aktivitas', [AktivitasController::class, 'index']);
-            // Route::get('/export-pengguna', [AktivitasController::class, 'exportPengguna']);
-            // Route::post('/import-pengguna', [AktivitasController::class, 'importPengguna']);
+            Route::get('/export-aktivitas', [AktivitasController::class, 'exportAktivitas']);
+            Route::post('/import-pengguna', [AktivitasController::class, 'importPengguna']);
             Route::apiResource('/aktivitas', AktivitasController::class);
         });
     });

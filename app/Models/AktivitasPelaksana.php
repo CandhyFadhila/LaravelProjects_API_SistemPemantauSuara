@@ -34,7 +34,7 @@ class AktivitasPelaksana extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function status_aktivitas(): BelongsTo
+    public function status(): BelongsTo
     {
         return $this->belongsTo(StatusAktivitas::class, 'status_aktivitas', 'id');
     }

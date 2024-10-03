@@ -29,8 +29,13 @@ class PenggunaController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
+            $loggedInUser = auth()->user();
             $limit = $request->input('limit', 10);
-            $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            if (!$loggedInUser->hasRole('Super Admin') && !$loggedInUser->hasRole('Penanggung Jawab')) {
+                $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            } else {
+                $query = User::query()->where('status_aktif', 1)->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            }
 
             $filters = $request->all();
             $query = UserFilterHelper::applyFiltersUser($query, $filters);
@@ -242,7 +247,7 @@ class PenggunaController extends Controller
     public function toggleStatusUser($id)
     {
         try {
-            if (!Gate::allows('edit pengguna')) {
+            if (!Gate::allows('aktifkan pengguna')) {
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
@@ -277,7 +282,7 @@ class PenggunaController extends Controller
     public function resetPasswordPengguna(Request $request)
     {
         try {
-            if (!Gate::allows('edit pengguna')) {
+            if (!Gate::allows('reset pengguna')) {
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
@@ -344,7 +349,7 @@ class PenggunaController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
-            $data_pengguna = User::where('status_aktif', 2)->where('id', '!=', 1)->get();
+            $data_pengguna = User::all();
             if ($data_pengguna->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data pengguna yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
             }
