@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_kelurahan');
             $table->string('kode_kelurahan');
             $table->integer('max_rw');
-            $table->integer('jumlah_tps')->nullable();
+            $table->integer('jumlah_tps');
             $table->foreignId('provinsi_id')->constrained('provinsis');
             $table->foreignId('kabupaten_id')->constrained('kabupatens');
             $table->foreignId('kecamatan_id')->constrained('kecamatans');

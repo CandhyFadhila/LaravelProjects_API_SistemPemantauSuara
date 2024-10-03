@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Helpers\FileUploadHelper;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Exports\Pengguna\PenggunaExport;
 use App\Imports\Pengguna\PenggunaImport;
 use App\Helpers\Filters\UserFilterHelper;
+use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\Pengguna\StorePenggunaRequest;
 use App\Http\Requests\Pengguna\ImportPenggunaRequest;
@@ -24,89 +26,89 @@ class PenggunaController extends Controller
 {
     public function index(Request $request)
     {
-        try {
-            if (!Gate::allows('view pengguna')) {
-                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
-            }
-
-            $loggedInUser = auth()->user();
-            $limit = $request->input('limit', 10);
-            if (!$loggedInUser->hasRole('Super Admin') && !$loggedInUser->hasRole('Penanggung Jawab')) {
-                $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
-            } else {
-                $query = User::query()->where('status_aktif', 1)->where('id', '!=', 1)->orderBy('created_at', 'desc');
-            }
-
-            $filters = $request->all();
-            $query = UserFilterHelper::applyFiltersUser($query, $filters);
-
-            if ($limit == 0) {
-                $users = $query->get();
-                $paginationData = null;
-            } else {
-                $limit = is_numeric($limit) ? (int)$limit : 10;
-                $users = $query->paginate($limit);
-
-                $paginationData = [
-                    'links' => [
-                        'first' => $users->url(1),
-                        'last' => $users->url($users->lastPage()),
-                        'prev' => $users->previousPageUrl(),
-                        'next' => $users->nextPageUrl(),
-                    ],
-                    'meta' => [
-                        'current_page' => $users->currentPage(),
-                        'last_page' => $users->lastPage(),
-                        'per_page' => $users->perPage(),
-                        'total' => $users->total(),
-                    ]
-                ];
-            }
-
-            if ($users->isEmpty()) {
-                return response()->json([
-                    'status' => Response::HTTP_NOT_FOUND,
-                    'message' => 'Data pengguna tidak ditemukan.',
-                ], Response::HTTP_OK);
-            }
-
-            $formattedData = $users->map(function ($user) {
-                $role = $user->roles->first();
-                return [
-                    'id' => $user->id,
-                    'nama' => $user->nama,
-                    'username' => $user->username,
-                    'jenis_kelamin' => $user->jenis_kelamin,
-                    'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
-                    'nik_ktp' => $user->nik_ktp,
-                    'no_hp' => $user->no_hp ?? null,
-                    'tgl_diangkat' => $user->tgl_diangkat,
-                    'role' => $role ? [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                        'deskripsi' => $role->deskripsi,
-                        'created_at' => $role->created_at,
-                        'updated_at' => $role->updated_at,
-                    ] : null,
-                    'status_aktif' => $user->status_aktif,
-                    'created_at' => $user->created_at,
-                    'updated_at' => $user->updated_at,
-                ];
-            });
-
-            return response()->json([
-                'status' => Response::HTTP_OK,
-                'message' => 'Data pengguna berhasil ditampilkan.',
-                'data' => $formattedData,
-                'pagination' => $paginationData
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            Log::error('| Pengguna | - Error function index: ' . $e->getMessage());
-            return response()->json([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // try {
+        if (!Gate::allows('view pengguna')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
+
+        $loggedInUser = Auth::user();
+        $limit = $request->input('limit', 10);
+        if ($loggedInUser->hasAnyRole(['Super Admin', 'Penanggung Jawab'])) {
+            $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+        } else {
+            $query = User::query()->where('status_aktif', 1)->where('id', '!=', 1)->orderBy('created_at', 'desc');
+        }
+
+        $filters = $request->all();
+        $query = UserFilterHelper::applyFiltersUser($query, $filters);
+
+        if ($limit == 0) {
+            $users = $query->get();
+            $paginationData = null;
+        } else {
+            $limit = is_numeric($limit) ? (int)$limit : 10;
+            $users = $query->paginate($limit);
+
+            $paginationData = [
+                'links' => [
+                    'first' => $users->url(1),
+                    'last' => $users->url($users->lastPage()),
+                    'prev' => $users->previousPageUrl(),
+                    'next' => $users->nextPageUrl(),
+                ],
+                'meta' => [
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                    'per_page' => $users->perPage(),
+                    'total' => $users->total(),
+                ]
+            ];
+        }
+
+        if ($users->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data pengguna tidak ditemukan.',
+            ], Response::HTTP_OK);
+        }
+
+        $formattedData = $users->map(function ($user) {
+            $role = $user->roles->first();
+            return [
+                'id' => $user->id,
+                'nama' => $user->nama,
+                'username' => $user->username,
+                'jenis_kelamin' => $user->jenis_kelamin,
+                'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
+                'nik_ktp' => $user->nik_ktp,
+                'no_hp' => $user->no_hp ?? null,
+                'tgl_diangkat' => $user->tgl_diangkat,
+                'role' => $role ? [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'deskripsi' => $role->deskripsi,
+                    'created_at' => $role->created_at,
+                    'updated_at' => $role->updated_at,
+                ] : null,
+                'status_aktif' => $user->status_aktif,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Data pengguna berhasil ditampilkan.',
+            'data' => $formattedData,
+            'pagination' => $paginationData
+        ], Response::HTTP_OK);
+        // } catch (\Exception $e) {
+        //     Log::error('| Pengguna | - Error function index: ' . $e->getMessage());
+        //     return response()->json([
+        //         'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+        //         'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+        //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     public function store(StorePenggunaRequest $request)
@@ -279,16 +281,16 @@ class PenggunaController extends Controller
         }
     }
 
-    public function resetPasswordPengguna(Request $request)
+    // Reset by admin
+    public function resetPasswordPengguna(Request $request, $id)
     {
         try {
-            if (!Gate::allows('reset pengguna')) {
+            if (!Gate::allows('reset password')) {
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
             // 1. Get user_id dari request
-            $userId = $request->input('user_id');
-            $user = User::find($userId);
+            $user = User::find($id);
             if (!$user) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pengguna akun tidak ditemukan.'), Response::HTTP_NOT_FOUND);
             }
@@ -299,7 +301,7 @@ class PenggunaController extends Controller
             }
 
             // 3. Reset password
-            $newPassword = $request->input('password', '1234');
+            $newPassword = $request->input('password');
             $hashedPassword = Hash::make($newPassword);
             $user->password = $hashedPassword;
             $user->save();
@@ -310,6 +312,36 @@ class PenggunaController extends Controller
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('| Pengguna | - Error function resetPasswordPengguna: ' . $e->getMessage());
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Reset by user
+    public function updatePasswordPengguna(UpdateUserPasswordRequest $request)
+    {
+        try {
+            if (!Gate::allows('update password')) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+            }
+
+            $user = Auth::user();
+            $data = $request->validated();
+            if (isset($data['password'])) {
+                $currentPassword = $request->input('current_password');
+                if (!Hash::check($currentPassword, $user->password)) {
+                    return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kata sandi yang anda masukkan tidak valid.'), Response::HTTP_BAD_REQUEST);
+                }
+
+                $data['password'] = Hash::make($data['password']);
+            }
+            /** @var \App\Models\User $user **/
+            $user->fill($data)->save();
+            return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berhasil memperbarui kata sandi anda.'), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('| Pengguna | - Error function updatePasswordPengguna: ' . $e->getMessage());
             return response()->json([
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',

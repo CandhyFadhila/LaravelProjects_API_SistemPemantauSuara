@@ -29,11 +29,10 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'nama_aktivitas' => 'required',
+            'deskripsi' => 'required',
             'kelurahan' => 'required|exists:kelurahans,nama_kelurahan',
             'rw' => 'required|integer',
             'pelaksana' => 'required|exists:users,nama',
-            'deskripsi' => 'nullable',
             'tanggal_mulai' => 'required',
             'tanggal_selesai' => 'required',
             'status_aktivitas' => 'required|exists:status,label',
@@ -44,7 +43,7 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
     public function customValidationMessages()
     {
         return [
-            'nama_aktivitas.required' => 'Nama aktivitas tidak boleh kosong.',
+            'deskripsi.required' => 'Deskripsi aktivitas tidak boleh kosong.',
             'kelurahan.required' => 'Silahkan masukkan nama kelurahan aktivitas terlebih dahulu.',
             'kelurahan.exists' => 'Kelurahan yang dimasukkan tidak ada dalam database.',
             'rw.required' => 'Lokasi RW di kelurahan aktivitas tidak boleh kosong.',
@@ -77,11 +76,10 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
         }
 
         return new AktivitasPelaksana([
-            'nama_aktivitas' => $row['nama_aktivitas'],
+            'deskripsi' => $row['deskripsi'],
             'kelurahan' => $kelurahan->id,
             'rw' => $row['rw'],
             'pelaksana' => $pelaksana->id,
-            'deskripsi' => $row['deskripsi'] ?? null,
             'tgl_mulai' => $row['tanggal_mulai'],
             'tgl_selesai' => $row['tanggal_selesai'],
             'status_aktivitas' => $status_aktivitas->id,

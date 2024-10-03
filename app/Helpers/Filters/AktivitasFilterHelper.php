@@ -26,23 +26,23 @@ class AktivitasFilterHelper
 			});
 		}
 
-		if (isset($filters['kelurahan'])) {
-			$kelurahan = $filters['kelurahan'];
-			$query->whereHas('kelurahans', function ($query) use ($kelurahan) {
-				if (is_array($kelurahan)) {
-					$query->whereIn('id', $kelurahan);
-				} else {
-					$query->where('id', '=', $kelurahan);
-				}
+		// Filter berdasarkan kode_kelurahan
+		if (isset($filters['kode_kelurahan'])) {
+			$kodeKelurahan = $filters['kode_kelurahan'];
+			$query->whereHas('kelurahans', function ($query) use ($kodeKelurahan) {
+				$query->whereIn('kode_kelurahan', $kodeKelurahan);
 			});
 		}
 
-		if (isset($filters['search'])) {
-			$searchTerm = '%' . $filters['search'] . '%';
-			$query->where(function ($query) use ($searchTerm) {
-				$query->whereHas('pelaksana_users', function ($query) use ($searchTerm) {
-					$query->where('nama', 'like', $searchTerm);
-				})->orWhere('nama_aktivitas', 'like', $searchTerm);
+		if (isset($filters['search']) && is_array($filters['search'])) {
+			$searchTerms = $filters['search'];
+			$query->where(function ($query) use ($searchTerms) {
+				foreach ($searchTerms as $term) {
+					$searchTerm = '%' . $term . '%';
+					$query->orWhereHas('pelaksana_users', function ($query) use ($searchTerm) {
+						$query->where('nama', 'like', $searchTerm);
+					});
+				}
 			});
 		}
 

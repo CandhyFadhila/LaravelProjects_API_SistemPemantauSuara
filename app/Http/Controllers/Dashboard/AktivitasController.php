@@ -56,7 +56,6 @@ class AktivitasController extends Controller
                     ]
                 ];
             }
-
             if ($data_aktivitas->isEmpty()) {
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,

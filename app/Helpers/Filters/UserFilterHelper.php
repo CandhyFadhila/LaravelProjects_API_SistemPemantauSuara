@@ -28,11 +28,11 @@ class UserFilterHelper
 		}
 
 		// Filter pencarian
-		if (isset($filters['search'])) {
-			$searchTerm = '%' . $filters['search'] . '%';
-			$query->where(function ($query) use ($searchTerm) {
-				$query->where('nama', 'like', $searchTerm)
-					->orWhere('no_hp', 'like', $searchTerm);
+		if (isset($filters['search']) && is_array($filters['search'])) {
+			$query->where(function ($query) use ($filters) {
+				foreach ($filters['search'] as $term) {
+					$query->orWhere('nama', 'like', '%' . $term . '%');
+				}
 			});
 		}
 

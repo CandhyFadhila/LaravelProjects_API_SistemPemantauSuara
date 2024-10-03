@@ -21,6 +21,7 @@ class KelurahanSeeder extends Seeder
                 'max_rw' => $kelurahan['max_rw'],
                 'provinsi_id' => 1,
                 'kabupaten_id' => 1,
+                'jumlah_tps' => rand(1, 25),
                 'kecamatan_id' => $kelurahan['kecamatan_id'],
                 'created_at' => Carbon::now('Asia/Jakarta'),
                 'updated_at' => Carbon::now('Asia/Jakarta'),

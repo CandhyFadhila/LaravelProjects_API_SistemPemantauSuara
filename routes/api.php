@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\AktivitasController;
+use App\Http\Controllers\Dashboard\DetailMapController;
 use App\Http\Controllers\Dashboard\PenggunaController;
 use App\Http\Controllers\Dashboard\SuaraKPUController;
 use Illuminate\Http\Request;
@@ -43,7 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('credentials')->group(function () {
             Route::get('/account-info', [LoginController::class, 'getInfoUserLogin']);
             Route::post('/activate-pengguna/{id}', [PenggunaController::class, 'toggleStatusUser']);
-            Route::post('/reset-password-pengguna', [PenggunaController::class, 'resetPasswordPengguna']);
+            Route::post('/reset-password-pengguna/{id}', [PenggunaController::class, 'resetPasswordPengguna']);
+            Route::post('/update-password-pengguna', [PenggunaController::class, 'updatePasswordPengguna']);
         });
 
         // ! Pengguna
@@ -60,7 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         // ! Monitoring Suara
-        Route::prefix('monitoring-suara')->group(function () {
+        Route::prefix('monitoring')->group(function () {
+            Route::post('/potensi-suara', [DetailMapController::class, 'indexPotensiSuara']);
+            Route::post('/suara-kpu', [DetailMapController::class, 'indexSuaraKPU']);
             Route::post('/get-suara-kpu', [SuaraKPUController::class, 'index']);
         });
     });
