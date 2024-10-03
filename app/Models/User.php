@@ -7,13 +7,13 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $guarded = ['id'];
 
@@ -38,6 +38,7 @@ class User extends Authenticatable
         'password' => 'hashed',
         'role_id' => 'integer',
         'status_aktif' => 'integer',
+        'kelurahan_id' => 'integer',
     ];
 
     /**
@@ -48,5 +49,15 @@ class User extends Authenticatable
     public function aktivitas_users(): HasMany
     {
         return $this->hasMany(AktivitasPelaksana::class, 'pelaksana', 'id');
+    }
+
+    /**
+     * Get the keluarahans that owns the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function kelurahans(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
     }
 }

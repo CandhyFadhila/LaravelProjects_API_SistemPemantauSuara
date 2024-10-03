@@ -97,6 +97,17 @@ class PublikRequestController extends Controller
                         'created_at' => $role->created_at,
                         'updated_at' => $role->updated_at,
                     ] : null,
+                    'kelurahan' => $user->kelurahans ? [
+                        'id' => $user->kelurahans->id,
+                        'nama_kelurahan' => $user->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $user->kelurahans->kode_kelurahan,
+                        'max_rw' => $user->kelurahans->max_rw,
+                        'provinsi_id' => $user->kelurahans->provinsis,
+                        'kabupaten_id' => $user->kelurahans->kabupaten_kotas,
+                        'kecamatan_id' => $user->kelurahans->kecamatans,
+                        'created_at' => $user->kelurahans->created_at,
+                        'updated_at' => $user->kelurahans->updated_at
+                    ] : null,
                     'status_aktif' => $user->status_aktif,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,

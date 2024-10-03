@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
                 'tgl_diangkat' => $faker->date(),
                 'jenis_kelamin' => $jenisKelamin,
                 'password' => Hash::make('password123'),
-                'status_aktif' => rand(0, 1),
+                'status_aktif' => rand(1, 3),
             ]);
 
             $role = Role::where('name', 'Pelaksana')->first();

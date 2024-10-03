@@ -33,6 +33,7 @@ class StorePenggunaRequest extends FormRequest
             'no_hp' => 'nullable|max:50',
             'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:5048',
             'role_id' => 'required|integer',
+            'kelurahan_id' => 'required|integer|exists:kelurahans,id',
         ];
     }
 
@@ -58,6 +59,9 @@ class StorePenggunaRequest extends FormRequest
             'foto_profil.max' => 'Ukuran file foto yang diperbolehkan maksimal 5 MB.',
             'role_id.required' => 'Role pengguna tidak diperbolehkan kosong.',
             'role_id.integer' => 'Role pengguna tidak diperbolehkan mengandung selain angka.',
+            'kelurahan_id.required' => 'Kelurahan yang diampu pengguna tidak diperbolehkan kosong.',
+            'kelurahan_id.integer' => 'Kelurahan yang diampu pengguna tidak diperbolehkan mengandung selain angka.',
+            'kelurahan_id.exists' => 'Kelurahan yang diampu pengguna tidak ada di database.',
         ];
     }
 

@@ -26,89 +26,100 @@ class PenggunaController extends Controller
 {
     public function index(Request $request)
     {
-        // try {
-        if (!Gate::allows('view pengguna')) {
-            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
-        }
+        try {
+            if (!Gate::allows('view pengguna')) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+            }
 
-        $loggedInUser = Auth::user();
-        $limit = $request->input('limit', 10);
-        if ($loggedInUser->hasAnyRole(['Super Admin', 'Penanggung Jawab'])) {
-            $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
-        } else {
-            $query = User::query()->where('status_aktif', 1)->where('id', '!=', 1)->orderBy('created_at', 'desc');
-        }
+            $loggedInUser = Auth::user();
+            $limit = $request->input('limit', 10);
+            if ($loggedInUser->hasAnyRole(['Super Admin', 'Penanggung Jawab'])) {
+                $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            } else {
+                $query = User::query()->where('status_aktif', 2)->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            }
 
-        $filters = $request->all();
-        $query = UserFilterHelper::applyFiltersUser($query, $filters);
+            $filters = $request->all();
+            $query = UserFilterHelper::applyFiltersUser($query, $filters);
 
-        if ($limit == 0) {
-            $users = $query->get();
-            $paginationData = null;
-        } else {
-            $limit = is_numeric($limit) ? (int)$limit : 10;
-            $users = $query->paginate($limit);
+            if ($limit == 0) {
+                $users = $query->get();
+                $paginationData = null;
+            } else {
+                $limit = is_numeric($limit) ? (int)$limit : 10;
+                $users = $query->paginate($limit);
 
-            $paginationData = [
-                'links' => [
-                    'first' => $users->url(1),
-                    'last' => $users->url($users->lastPage()),
-                    'prev' => $users->previousPageUrl(),
-                    'next' => $users->nextPageUrl(),
-                ],
-                'meta' => [
-                    'current_page' => $users->currentPage(),
-                    'last_page' => $users->lastPage(),
-                    'per_page' => $users->perPage(),
-                    'total' => $users->total(),
-                ]
-            ];
-        }
+                $paginationData = [
+                    'links' => [
+                        'first' => $users->url(1),
+                        'last' => $users->url($users->lastPage()),
+                        'prev' => $users->previousPageUrl(),
+                        'next' => $users->nextPageUrl(),
+                    ],
+                    'meta' => [
+                        'current_page' => $users->currentPage(),
+                        'last_page' => $users->lastPage(),
+                        'per_page' => $users->perPage(),
+                        'total' => $users->total(),
+                    ]
+                ];
+            }
 
-        if ($users->isEmpty()) {
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data pengguna tidak ditemukan.',
+                ], Response::HTTP_OK);
+            }
+
+            $formattedData = $users->map(function ($user) {
+                $role = $user->roles->first();
+                return [
+                    'id' => $user->id,
+                    'nama' => $user->nama,
+                    'username' => $user->username,
+                    'jenis_kelamin' => $user->jenis_kelamin,
+                    'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
+                    'nik_ktp' => $user->nik_ktp,
+                    'no_hp' => $user->no_hp ?? null,
+                    'tgl_diangkat' => $user->tgl_diangkat,
+                    'role' => $role ? [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'deskripsi' => $role->deskripsi,
+                        'created_at' => $role->created_at,
+                        'updated_at' => $role->updated_at,
+                    ] : null,
+                    'kelurahan' => $user->kelurahans ? [
+                        'id' => $user->kelurahans->id,
+                        'nama_kelurahan' => $user->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $user->kelurahans->kode_kelurahan,
+                        'max_rw' => $user->kelurahans->max_rw,
+                        'provinsi_id' => $user->kelurahans->provinsis,
+                        'kabupaten_id' => $user->kelurahans->kabupaten_kotas,
+                        'kecamatan_id' => $user->kelurahans->kecamatans,
+                        'created_at' => $user->kelurahans->created_at,
+                        'updated_at' => $user->kelurahans->updated_at
+                    ] : null,
+                    'status_aktif' => $user->status_aktif,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                ];
+            });
+
             return response()->json([
-                'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data pengguna tidak ditemukan.',
+                'status' => Response::HTTP_OK,
+                'message' => 'Data pengguna berhasil ditampilkan.',
+                'data' => $formattedData,
+                'pagination' => $paginationData
             ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('| Pengguna | - Error function index: ' . $e->getMessage());
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $formattedData = $users->map(function ($user) {
-            $role = $user->roles->first();
-            return [
-                'id' => $user->id,
-                'nama' => $user->nama,
-                'username' => $user->username,
-                'jenis_kelamin' => $user->jenis_kelamin,
-                'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
-                'nik_ktp' => $user->nik_ktp,
-                'no_hp' => $user->no_hp ?? null,
-                'tgl_diangkat' => $user->tgl_diangkat,
-                'role' => $role ? [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'deskripsi' => $role->deskripsi,
-                    'created_at' => $role->created_at,
-                    'updated_at' => $role->updated_at,
-                ] : null,
-                'status_aktif' => $user->status_aktif,
-                'created_at' => $user->created_at,
-                'updated_at' => $user->updated_at,
-            ];
-        });
-
-        return response()->json([
-            'status' => Response::HTTP_OK,
-            'message' => 'Data pengguna berhasil ditampilkan.',
-            'data' => $formattedData,
-            'pagination' => $paginationData
-        ], Response::HTTP_OK);
-        // } catch (\Exception $e) {
-        //     Log::error('| Pengguna | - Error function index: ' . $e->getMessage());
-        //     return response()->json([
-        //         'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-        //         'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
-        //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
     }
 
     public function store(StorePenggunaRequest $request)
@@ -119,16 +130,14 @@ class PenggunaController extends Controller
             }
 
             $data = $request->validated();
-            // dd($data);
             $password = $data['password'] ?? '12345';
 
             $fotoProfilPath = null;
             if ($request->hasFile('foto_profil')) {
                 $fotoProfilPath = FileUploadHelper::storePhoto($request->file('foto_profil'), 'profiles');
-                // dd($fotoProfilPath);
             }
 
-            $user = User::create([
+            $user = [
                 'nama' => $data['nama'],
                 'username' => $data['username'],
                 'jenis_kelamin' => $data['jenis_kelamin'],
@@ -136,13 +145,16 @@ class PenggunaController extends Controller
                 'foto_profil' => $fotoProfilPath,
                 'no_hp' => $data['no_hp'] ?? null,
                 'role_id' => $data['role_id'],
+                'kelurahan_id' => $data['kelurahan_id'],
                 'password' => Hash::make($password),
-            ]);
+            ];
+            $createUser = User::create($user);
+            $createUser->roles()->attach($data['role_id']);
 
             return response()->json([
                 'status' => Response::HTTP_CREATED,
-                'message' => "Pengguna baru '{$user->nama}' berhasil ditambahkan.",
-                'data' => $user
+                'message' => "Pengguna baru '{$createUser->nama}' berhasil ditambahkan.",
+                'data' => $createUser
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             Log::error('| Pengguna | - Error function store: ' . $e->getMessage());
@@ -178,6 +190,7 @@ class PenggunaController extends Controller
                 'nik_ktp' => $user->nik_ktp,
                 'no_hp' => $user->no_hp ?? null,
                 'tgl_diangkat' => $user->tgl_diangkat,
+                'status_aktif' => $user->status_aktif,
                 'role' => $role ? [
                     'id' => $role->id,
                     'name' => $role->name,
@@ -185,14 +198,24 @@ class PenggunaController extends Controller
                     'created_at' => $role->created_at,
                     'updated_at' => $role->updated_at,
                 ] : null,
-                'status_aktif' => $user->status_aktif,
+                'kelurahan' => $user->kelurahans ? [
+                    'id' => $user->kelurahans->id,
+                    'nama_kelurahan' => $user->kelurahans->nama_kelurahan,
+                    'kode_kelurahan' => $user->kelurahans->kode_kelurahan,
+                    'max_rw' => $user->kelurahans->max_rw,
+                    'provinsi_id' => $user->kelurahans->provinsis,
+                    'kabupaten_id' => $user->kelurahans->kabupaten_kotas,
+                    'kecamatan_id' => $user->kelurahans->kecamatans,
+                    'created_at' => $user->kelurahans->created_at,
+                    'updated_at' => $user->kelurahans->updated_at
+                ] : null,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ];
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Detail pengguna berhasil ditampilkan.',
+                'message' => "Detail pengguna '{$user->nama}' berhasil ditampilkan.",
                 'data' => $formattedData
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -230,6 +253,10 @@ class PenggunaController extends Controller
             $user->nik_ktp = $validatedData['nik_ktp'] ?? $user->nik_ktp;
             $user->no_hp = $validatedData['no_hp'] ?? $user->no_hp;
             $user->role_id = $validatedData['role_id'] ?? $user->role_id;
+
+            if (isset($validatedData['role_id'])) {
+                $user->roles()->sync([$validatedData['role_id']]);
+            }
             $user->save();
 
             return response()->json([
