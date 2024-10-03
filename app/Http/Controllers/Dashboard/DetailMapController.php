@@ -155,16 +155,16 @@ class DetailMapController extends Controller
                     'nama' => $item->partais->nama,
                     'color' => $item->partais->color ?? null
                 ] : null,
-                'kelurahan' => $aktivitas->kelurahans ? [
-                    'id' => $aktivitas->kelurahans->id,
-                    'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
-                    'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
-                    'max_rw' => $aktivitas->kelurahans->max_rw,
-                    'kecamatan' => $aktivitas->kelurahans->kecamatans,
-                    'kabupaten' => $aktivitas->kelurahans->kabupaten_kotas,
-                    'provinsi' => $aktivitas->kelurahans->provinsis,
-                    'created_at' => $aktivitas->kelurahans->created_at,
-                    'updated_at' => $aktivitas->kelurahans->updated_at
+                'kelurahan' => $item->kelurahans ? [
+                    'id' => $item->kelurahans->id,
+                    'nama_kelurahan' => $item->kelurahans->nama_kelurahan,
+                    'kode_kelurahan' => $item->kelurahans->kode_kelurahan,
+                    'max_rw' => $item->kelurahans->max_rw,
+                    'kecamatan' => $item->kelurahans->kecamatans,
+                    'kabupaten' => $item->kelurahans->kabupaten_kotas,
+                    'provinsi' => $item->kelurahans->provinsis,
+                    'created_at' => $item->kelurahans->created_at,
+                    'updated_at' => $item->kelurahans->updated_at
                 ] : null,
                 'tahun' => $item->tahun,
                 'tps' => $item->tps,
@@ -177,13 +177,24 @@ class DetailMapController extends Controller
             ];
         });
 
+        $format_chart = $suaraKPU->map(function ($item) {
+            return [
+                'partai' => $item->partais ? [
+                    'id' => $item->partais->id,
+                    'nama' => $item->partais->nama,
+                    'color' => $item->partais->color ?? null
+                ] : null,
+                'jumlah_suara' => $item->jumlah_suara
+            ];
+        })->values();
+
         // Kembalikan data dalam bentuk response JSON
         return response()->json([
             'status' => Response::HTTP_OK,
             'message' => 'Data suara KPU berhasil ditampilkan.',
             'data' => [
-                'table' => $format_suaraKPU,
-                'tahun' => $tahun
+                'chart' => $format_chart,
+                'table' => $format_suaraKPU
             ],
         ], Response::HTTP_OK);
     }
