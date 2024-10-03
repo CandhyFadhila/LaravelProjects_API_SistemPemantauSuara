@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('tgl_mulai');
             $table->string('tgl_selesai');
             $table->string('tempat_aktivitas');
-            $table->string('foto_aktivitas');
+            $table->string('foto_aktivitas')->nullable();
             $table->integer('rw');
-            $table->integer('potensi_suara')->nullable();
+            $table->integer('potensi_suara');
             $table->foreignId('kelurahan')->constrained('kelurahans');
             $table->timestamps();
         });

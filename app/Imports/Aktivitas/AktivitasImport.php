@@ -30,12 +30,13 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'deskripsi' => 'required',
-            'kelurahan' => 'required|exists:kelurahans,nama_kelurahan',
+            'kelurahan' => 'required',
             'rw' => 'required|integer',
-            'pelaksana' => 'required|exists:users,nama',
+            'pelaksana_nik' => 'required',
             'tanggal_mulai' => 'required',
             'tanggal_selesai' => 'required',
-            'status_aktivitas' => 'required|exists:status,label',
+            'potensi_suara' => 'required|integer',
+            'status_aktivitas' => 'required',
             'tempat_aktivitas' => 'required',
         ];
     }
@@ -45,24 +46,23 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
         return [
             'deskripsi.required' => 'Deskripsi aktivitas tidak boleh kosong.',
             'kelurahan.required' => 'Silahkan masukkan nama kelurahan aktivitas terlebih dahulu.',
-            'kelurahan.exists' => 'Kelurahan yang dimasukkan tidak ada dalam database.',
             'rw.required' => 'Lokasi RW di kelurahan aktivitas tidak boleh kosong.',
-            'rw.integer' => 'Kelurahan yang dimasukkan tidak ada dalam database.',
-            'pelaksana.required' => 'Silahkan masukkan nama pelaksana aktivitas terlebih dahulu.',
-            'pelaksana.exists' => 'Pelaksana aktivitas yang dimasukkan tidak ada dalam database.',
+            'rw.integer' => 'Lokasi RW di kelurahan aktivitas tidak diperbolehkan selain angka.',
+            'pelaksana_nik.required' => 'Silahkan masukkan NIK KTP pelaksana aktivitas terlebih dahulu.',
             'tanggal_mulai.required' => 'Silahkan masukkan tanggal mulai aktivitas terlebih dahulu.',
             'tanggal_selesai.required' => 'Silahkan masukkan tanggal selesai aktivitas terlebih dahulu.',
+            'potensi_suara.required' => 'Potensi suara yang ada di kelurahan aktivitas tidak boleh kosong.',
+            'potensi_suara.integer' => 'Potensi suara yang dimasukkan tidak diperbolehkan selain angka.',
             'status_aktivitas.required' => 'Silahkan masukkan status aktivitas terlebih dahulu.',
-            'status_aktivitas.exists' => 'Status aktivitas yang dimasukkan tidak ada dalam database.',
             'tempat_aktivitas.required' => 'Silahkan masukkan tempat aktivitas terlebih dahulu.',
         ];
     }
 
     public function model(array $row)
     {
-        $pelaksana = $this->User->where('nama', $row['pelaksana'])->first();
+        $pelaksana = User::where('nik_ktp', $row['pelaksana_nik'])->first();
         if (!$pelaksana) {
-            throw new \Exception("Pelaksana '" . $row['pelaksana'] . "' tidak ditemukan.");
+            throw new \Exception("Pelaksana dengan NIK KTP '" . $row['pelaksana_nik'] . "' tidak ditemukan.");
         }
 
         $kelurahan = $this->Kelurahan->where('nama_kelurahan', $row['kelurahan'])->first();
@@ -82,6 +82,7 @@ class AktivitasImport implements ToModel, WithHeadingRow, WithValidation
             'pelaksana' => $pelaksana->id,
             'tgl_mulai' => $row['tanggal_mulai'],
             'tgl_selesai' => $row['tanggal_selesai'],
+            'potensi_suara' => $row['potensi_suara'],
             'status_aktivitas' => $status_aktivitas->id,
             'tempat_aktivitas' => $row['tempat_aktivitas']
         ]);

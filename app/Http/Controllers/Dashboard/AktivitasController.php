@@ -316,7 +316,7 @@ class AktivitasController extends Controller
 
             $data_aktivitas = AktivitasPelaksana::all();
             if ($data_aktivitas->isEmpty()) {
-                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data pengguna yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data aktivitas yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
             }
 
             try {

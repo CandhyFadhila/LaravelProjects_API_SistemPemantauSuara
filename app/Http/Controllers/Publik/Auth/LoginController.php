@@ -24,6 +24,13 @@ class LoginController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Username atau password Anda tidak valid, silakan periksa kembali dan lakukan login ulang.'), Response::HTTP_BAD_REQUEST);
         }
 
+        // Cek status_aktif
+        if ($user->status_aktif == 0) {
+            auth()->logout();
+            Log::info("| Auth | - Login failed for user ID: {$user->id} - Account inactive since {$user->updated_at}.");
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, "Kami mendeteksi bahwa akun anda tidak aktif sejak {$user->updated_at}."), Response::HTTP_FORBIDDEN);
+        }
+
         Log::info("Login successful for user ID: {$user->id}, Name: {$user->nama}.");
 
         $isAdmin = $user->hasRole(['Super Admin', 'Penanggung Jawab']) || in_array($user->role_id, [1, 2]);

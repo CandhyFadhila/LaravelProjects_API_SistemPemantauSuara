@@ -21,6 +21,7 @@ class SuaraKPUSeeder extends Seeder
                 'kelurahan_id' => Kelurahan::inRandomOrder()->first()->id, // Mengambil kelurahan secara acak
                 'tahun' => 2024,
                 'tps' => rand(1, 10), // TPS antara 1 sampai 10
+                'alamat' => 'Jalan Jalan',
                 'jumlah_suara' => rand(100, 500), // Jumlah suara antara 100 sampai 500
                 'jumlah_dpt' => rand(500, 1000), // Jumlah DPT antara 500 sampai 1000
                 'suara_caleg' => rand(50, 250), // Suara caleg antara 50 sampai 250

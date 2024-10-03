@@ -65,7 +65,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('monitoring')->group(function () {
             Route::post('/potensi-suara', [DetailMapController::class, 'indexPotensiSuara']);
             Route::post('/suara-kpu', [DetailMapController::class, 'indexSuaraKPU']);
-            Route::post('/get-suara-kpu', [SuaraKPUController::class, 'index']);
+
+
+            Route::get('/suara-kpu-export', [SuaraKPUController::class, 'exportKPU']);
+            Route::post('/suara-kpu-import', [SuaraKPUController::class, 'importKPU']);
         });
     });
 });

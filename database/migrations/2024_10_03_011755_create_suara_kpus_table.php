@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('kelurahan_id')->constrained('kelurahans');
             $table->integer('tahun');
             $table->integer('tps'); // 1 sampai jumlah tps yang ada
+            $table->text('alamat');
             $table->integer('jumlah_suara');
             $table->integer('jumlah_dpt');
             $table->integer('suara_caleg')->nullable();
