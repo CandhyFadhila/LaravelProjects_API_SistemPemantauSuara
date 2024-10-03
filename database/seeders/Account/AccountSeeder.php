@@ -20,7 +20,7 @@ class AccountSeeder extends Seeder
             'tgl_diangkat' => '2024-10-01',
             'jenis_kelamin' => 1,
             'role_id' => 1,
-            'password' => Hash::make('SAP_super_admin_password'),
+            'password' => Hash::make('superadmin123'),
         ]);
         $roleSuperAdmin->assignRole('Super Admin');
     }
