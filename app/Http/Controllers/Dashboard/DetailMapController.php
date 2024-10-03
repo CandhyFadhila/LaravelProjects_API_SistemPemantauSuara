@@ -155,11 +155,16 @@ class DetailMapController extends Controller
                     'nama' => $item->partais->nama,
                     'color' => $item->partais->color ?? null
                 ] : null,
-                'kelurahan' => $item->kelurahans ? [
-                    'id' => $item->kelurahans->id,
-                    'nama_kelurahan' => $item->kelurahans->nama_kelurahan,
-                    'kode_kelurahan' => $item->kelurahans->kode_kelurahan,
-                    'max_rw' => $item->kelurahans->max_rw
+                'kelurahan' => $aktivitas->kelurahans ? [
+                    'id' => $aktivitas->kelurahans->id,
+                    'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
+                    'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
+                    'max_rw' => $aktivitas->kelurahans->max_rw,
+                    'kecamatan' => $aktivitas->kelurahans->kecamatans,
+                    'kabupaten' => $aktivitas->kelurahans->kabupaten_kotas,
+                    'provinsi' => $aktivitas->kelurahans->provinsis,
+                    'created_at' => $aktivitas->kelurahans->created_at,
+                    'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
                 'tahun' => $item->tahun,
                 'tps' => $item->tps,
