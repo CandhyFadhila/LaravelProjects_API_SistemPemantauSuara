@@ -25,7 +25,6 @@ class StoreAktivitasPelaksanaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama_aktivitas' => 'required|string',
             'kelurahan_id' => 'required|integer|exists:kelurahans,id',
             'rw' => 'required|integer',
             'pelaksana_id' => 'required|integer|exists:users,id',
@@ -40,8 +39,6 @@ class StoreAktivitasPelaksanaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nama_aktivitas.required' => 'Nama aktivitas tidak diperbolehkan kosong.',
-            'nama_aktivitas.string' => 'Nama aktivitas tidak diperbolehkan mengandung selain huruf dan angka.',
             'kelurahan_id.required' => 'Silahkan pilih kelurahan terlebih dahulu.',
             'kelurahan_id.integer' => 'Kelurahan tidak diperbolehkan mengandung selain angka.',
             'kelurahan_id.exists' => 'Kelurahan tersebut tidak ada dalam database.',

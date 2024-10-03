@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('aktivitas_pelaksanas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pelaksana')->constrained('users');
-            $table->string('nama_aktivitas');
             $table->foreignId('status_aktivitas')->constrained('status_aktivitas');
             $table->text('deskripsi')->nullable();
             $table->string('tgl_mulai');

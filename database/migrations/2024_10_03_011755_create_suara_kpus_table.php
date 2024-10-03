@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('partai_id')->constrained('partais');
             $table->foreignId('kelurahan_id')->constrained('kelurahans');
+            $table->integer('tahun');
             $table->integer('tps'); // 1 sampai jumlah tps yang ada
             $table->integer('jumlah_suara');
-            $table->integer('jumlah_dpt'); // suara tetap
-            $table->integer('suara_caleg')->nullable(); // suara tetap
-            $table->integer('suara_partai')->nullable(); // suara tetap
+            $table->integer('jumlah_dpt');
+            $table->integer('suara_caleg')->nullable();
+            $table->integer('suara_partai')->nullable();
             $table->timestamps();
         });
     }

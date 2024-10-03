@@ -21,7 +21,6 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'no',
-            'nama_aktivitas',
             'deskripsi',
             'tanggal_mulai',
             'tanggal_selesai',
@@ -42,7 +41,6 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
 
         return [
             $no++,
-            $aktivitas->nama_aktivitas,
             $aktivitas->deskripsi ?? 'N/A',
             $aktivitas->tgl_mulai,
             $aktivitas->tgl_selesai,

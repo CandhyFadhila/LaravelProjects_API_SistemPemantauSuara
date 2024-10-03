@@ -16,6 +16,7 @@ class PermissionSeeder extends Seeder
         $permissions = [
             'Manajemen Pengguna' => ['create pengguna', 'edit pengguna', 'view pengguna', 'import pengguna', 'export pengguna', 'aktifkan pengguna', 'reset password'],
             'Manajemen Aktivitas' => ['create aktivitas', 'edit aktivitas', 'delete aktivitas', 'view aktivitas', 'import aktivitas', 'export aktivitas'],
+            'Manajemen KPU' => ['create suaraKPU', 'edit suaraKPU', 'delete suaraKPU', 'view suaraKPU', 'import suaraKPU'],
             'Publik Request' => ['view publikRequest'],
         ];
 

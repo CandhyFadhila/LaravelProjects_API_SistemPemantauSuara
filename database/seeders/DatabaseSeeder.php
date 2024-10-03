@@ -35,6 +35,8 @@ class DatabaseSeeder extends Seeder
             KelurahanSeeder::class,
 
             PartaiSeeder::class,
+            SuaraKPUSeeder::class,
+            JenisDataSeeder::class,
 
             StatusAktivitasSeeder::class,
             AktivitasPelaksanaSeeder::class,

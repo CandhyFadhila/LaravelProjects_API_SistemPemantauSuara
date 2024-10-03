@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dashboard\AktivitasController;
 use App\Http\Controllers\Dashboard\PenggunaController;
+use App\Http\Controllers\Dashboard\SuaraKPUController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Publik\Auth\LoginController;
@@ -58,9 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // ! Monitoring Suara
         Route::prefix('monitoring-suara')->group(function () {
-            Route::get('/account-info', [LoginController::class, 'getInfoUserLogin']);
-            Route::post('/activate-pengguna/{id}', [PenggunaController::class, 'toggleStatusUser']);
-            Route::post('/reset-password-pengguna', [PenggunaController::class, 'resetPasswordPengguna']);
+            Route::post('/get-suara-kpu', [SuaraKPUController::class, 'index']);
         });
     });
 });

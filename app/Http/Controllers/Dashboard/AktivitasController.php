@@ -80,7 +80,6 @@ class AktivitasController extends Controller
                         'created_at' => $aktivitas->pelaksana_users->created_at,
                         'updated_at' => $aktivitas->pelaksana_users->updated_at
                     ] : null,
-                    'nama_aktivitas' => $aktivitas->nama_aktivitas,
                     'status_aktivitas' => $aktivitas->status_aktivitas,
                     'deskripsi' => $aktivitas->deskripsi,
                     'tgl_mulai' => $aktivitas->tgl_mulai,
@@ -136,7 +135,6 @@ class AktivitasController extends Controller
             // Simpan data aktivitas
             $aktivitas = AktivitasPelaksana::create([
                 'pelaksana' => $validatedData['pelaksana_id'],
-                'nama_aktivitas' => $validatedData['nama_aktivitas'],
                 'status_aktivitas' => 1,
                 'deskripsi' => $validatedData['deskripsi'] ?? null,
                 'tgl_mulai' => $validatedData['tgl_mulai'],
@@ -150,7 +148,7 @@ class AktivitasController extends Controller
             $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_CREATED,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil ditambahkan.",
+                'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil ditambahkan.",
                 'data' => $aktivitas
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
@@ -181,7 +179,6 @@ class AktivitasController extends Controller
             // Format data aktivitas
             $formattedData = [
                 'id' => $aktivitas->id,
-                'nama_aktivitas' => $aktivitas->nama_aktivitas,
                 'deskripsi' => $aktivitas->deskripsi,
                 'tgl_mulai' => $aktivitas->tgl_mulai,
                 'tgl_selesai' => $aktivitas->tgl_selesai,
@@ -219,7 +216,7 @@ class AktivitasController extends Controller
             $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil ditampilkan.",
+                'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil ditampilkan.",
                 'data' => $formattedData,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -269,7 +266,7 @@ class AktivitasController extends Controller
             $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil diperbarui.",
+                'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil diperbarui.",
                 'data' => $aktivitas
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -300,7 +297,7 @@ class AktivitasController extends Controller
             $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => "Aktivitas '{$aktivitas->nama_aktivitas}' pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil dihapus.",
+                'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal '{$tanggal_aktivitas}' berhasil dihapus.",
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('| Aktivitas | - Error function destroy: ' . $e->getMessage());
