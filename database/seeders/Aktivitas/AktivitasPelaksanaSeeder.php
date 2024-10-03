@@ -17,12 +17,10 @@ class AktivitasPelaksanaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil semua users, status aktivitas, dan kelurahan
-        $users = User::all();
+        $users = User::where('id', '!=', 1)->get();
         $statusAktivitas = StatusAktivitas::all();
         $kelurahans = Kelurahan::all();
 
-        // Jika tidak ada data di users, status aktivitas, atau kelurahan, hentikan seeding
         if ($users->isEmpty() || $statusAktivitas->isEmpty() || $kelurahans->isEmpty()) {
             return;
         }
