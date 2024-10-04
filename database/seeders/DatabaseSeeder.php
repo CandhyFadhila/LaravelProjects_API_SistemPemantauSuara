@@ -9,6 +9,7 @@ use Database\Seeders\Account\PermissionSeeder;
 use Database\Seeders\Account\RoleSeeder;
 use Database\Seeders\Aktivitas\AktivitasPelaksanaSeeder;
 use Database\Seeders\Aktivitas\StatusAktivitasSeeder;
+use Database\Seeders\Kategori\KategoriSuaraSeeder;
 use Database\Seeders\Semarang\KabupatenSeeder;
 use Database\Seeders\Semarang\KecamatanSeeder;
 use Database\Seeders\Semarang\KelurahanSeeder;
@@ -26,6 +27,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             AccountSeeder::class,
+
+            KategoriSuaraSeeder::class,
 
             UserSeeder::class,
 

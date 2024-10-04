@@ -2,6 +2,7 @@
 
 namespace App\Imports\KPU;
 
+use App\Models\KategoriSuara;
 use App\Models\Partai;
 use App\Models\SuaraKPU;
 use App\Models\Kelurahan;
@@ -16,11 +17,13 @@ class SuaraKPUImport implements ToModel, WithHeadingRow, WithValidation
 
     private $Partai;
     private $Kelurahan;
+    private $KategoriSuara;
 
     public function __construct()
     {
         $this->Partai = Partai::select('id', 'nama')->get();
         $this->Kelurahan = Kelurahan::select('id', 'nama_kelurahan')->get();
+        $this->KategoriSuara = KategoriSuara::select('id', 'label')->get();
     }
 
     public function rules(): array
@@ -30,8 +33,12 @@ class SuaraKPUImport implements ToModel, WithHeadingRow, WithValidation
             'kelurahan' => 'required',
             'tahun' => 'required|integer',
             'tps' => 'required|integer',
+            'kategori_suara' => 'required',
+            'cakupan_wilayah' => 'required',
             'alamat' => 'required',
             'jumlah_suara' => 'required|integer',
+            'dpt_laki' => 'required|integer',
+            'dpt_perempuan' => 'required|integer',
             'jumlah_dpt' => 'required|integer',
             'suara_caleg' => 'nullable|integer',
             'suara_partai' => 'nullable|integer',
@@ -47,9 +54,13 @@ class SuaraKPUImport implements ToModel, WithHeadingRow, WithValidation
             'tahun.integer' => 'Tahun harus berupa angka.',
             'tps.required' => 'TPS tidak boleh kosong.',
             'tps.integer' => 'TPS harus berupa angka.',
+            'cakupan_wilayah.required' => 'Cakupan wilayah TPS tidak boleh kosong.',
+            'kategori_suara.required' => 'Kategori suara TPS tidak boleh kosong.',
             'alamat.required' => 'Alamat tidak boleh kosong.',
             'jumlah_suara.required' => 'Jumlah suara tidak boleh kosong.',
             'jumlah_suara.integer' => 'Jumlah suara harus berupa angka.',
+            'dpt_laki.required' => 'Jumlah DPT laki-laki tidak boleh kosong.',
+            'dpt_perempuan.required' => 'Jumlah DPT perempuan tidak boleh kosong.',
             'jumlah_dpt.required' => 'Jumlah DPT tidak boleh kosong.',
             'jumlah_dpt.integer' => 'Jumlah DPT harus berupa angka.',
             'suara_caleg.integer' => 'Suara caleg harus berupa angka.',
@@ -69,13 +80,22 @@ class SuaraKPUImport implements ToModel, WithHeadingRow, WithValidation
             throw new \Exception("Kelurahan '" . $row['kelurahan'] . "' tidak ditemukan.");
         }
 
+        $kategori_suara = $this->KategoriSuara->where('label', $row['kategori_suara'])->first();
+        if (!$kategori_suara) {
+            throw new \Exception("Kategori '" . $row['kategori_suara'] . "' tidak ditemukan.");
+        }
+
         return new SuaraKPU([
             'partai_id' => $partai->id,
             'kelurahan_id' => $kelurahan->id,
             'tahun' => $row['tahun'],
             'tps' => $row['tps'],
+            'kategori_suara_id' => $kategori_suara->id,
+            'cakupan_wilayah' => $row['cakupan_wilayah'],
             'alamat' => $row['alamat'],
             'jumlah_suara' => $row['jumlah_suara'],
+            'dpt_laki' => $row['dpt_laki'],
+            'dpt_perempuan' => $row['dpt_perempuan'],
             'jumlah_dpt' => $row['jumlah_dpt'],
             'suara_caleg' => $row['suara_caleg'] ?? null,
             'suara_partai' => $row['suara_partai'] ?? null,

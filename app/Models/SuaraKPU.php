@@ -19,7 +19,10 @@ class SuaraKPU extends Model
         'kelurahan_id' => 'integer',
         'tps' => 'integer',
         'jumlah_suara' => 'integer',
+        'dpt_laki' => 'integer',
+        'dpt_perempuan' => 'integer',
         'jumlah_dpt' => 'integer',
+        'kategori_suara_id' => 'integer',
     ];
 
     /**
@@ -40,5 +43,15 @@ class SuaraKPU extends Model
     public function kelurahans(): BelongsTo
     {
         return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
+    }
+
+    /**
+     * Get the kategori_suaras that owns the SuaraKPU
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function kategori_suaras(): BelongsTo
+    {
+        return $this->belongsTo(KategoriSuara::class, 'kategori_suara_id', 'id');
     }
 }

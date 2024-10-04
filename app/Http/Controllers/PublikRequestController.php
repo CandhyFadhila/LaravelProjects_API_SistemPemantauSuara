@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
@@ -297,16 +296,34 @@ class PublikRequestController extends Controller
             $formattedData = $suara_kpu->map(function ($suara_kpu) {
                 return [
                     'id' => $suara_kpu->id,
-                    'partai' => $suara_kpu->partais,
-                    'kelurahan' => $suara_kpu->kelurahans,
+                    'partai' => $suara_kpu->partais ? [
+                        'id' => $suara_kpu->partais->id,
+                        'nama' => $suara_kpu->partais->nama,
+                        'color' => $suara_kpu->partais->color ?? null
+                    ] : null,
+                    'kelurahan' => $suara_kpu->kelurahans ? [
+                        'id' => $suara_kpu->kelurahans->id,
+                        'nama_kelurahan' => $suara_kpu->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $suara_kpu->kelurahans->kode_kelurahan,
+                        'max_rw' => $suara_kpu->kelurahans->max_rw,
+                        'kecamatan' => $suara_kpu->kelurahans->kecamatans,
+                        'kabupaten' => $suara_kpu->kelurahans->kabupaten_kotas,
+                        'provinsi' => $suara_kpu->kelurahans->provinsis,
+                        'created_at' => $suara_kpu->kelurahans->created_at,
+                        'updated_at' => $suara_kpu->kelurahans->updated_at
+                    ] : null,
                     'tahun' => $suara_kpu->tahun,
+                    'cakupan_wilayah' => $suara_kpu->cakupan_wilayah,
+                    'kategori_suara' => $suara_kpu->kategori_suaras,
                     'tps' => $suara_kpu->tps,
-                    'jumlah_suara' => $suara_kpu->jumlah_suara ?? null,
-                    'jumlah_dpt' => $suara_kpu->jumlah_dpt ?? null,
-                    'suara_caleg' => $suara_kpu->suara_caleg ?? null,
-                    'suara_partai' => $suara_kpu->suara_partai ?? null,
+                    'jumlah_suara' => $suara_kpu->jumlah_suara,
+                    'dpt_laki' => $suara_kpu->dpt_laki,
+                    'dpt_perempuan' => $suara_kpu->dpt_perempuan,
+                    'jumlah_dpt' => $suara_kpu->jumlah_dpt,
+                    'suara_caleg' => $suara_kpu->suara_caleg ?? 'N/A',
+                    'suara_partai' => $suara_kpu->suara_partai ?? 'N/A',
                     'created_at' => $suara_kpu->created_at,
-                    'updated_at' => $suara_kpu->updated_at
+                    'updated_at' => $suara_kpu->updated_at,
                 ];
             });
 

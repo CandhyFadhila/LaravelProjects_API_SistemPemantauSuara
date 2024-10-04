@@ -27,7 +27,7 @@ class PermissionHelper
 				'import aktivitas',
 				'export aktivitas',
 
-				// 'view suaraKPU',
+				'view suaraKPU',
 				// 'create suaraKPU',
 				// 'edit suaraKPU',
 				// 'delete suaraKPU',
@@ -51,7 +51,7 @@ class PermissionHelper
 				'import aktivitas',
 				'export aktivitas',
 
-				// 'view suaraKPU',
+				'view suaraKPU',
 			],
 			3 => [
 				'view publikRequest',

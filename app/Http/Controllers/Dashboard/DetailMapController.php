@@ -175,8 +175,12 @@ class DetailMapController extends Controller
                         'updated_at' => $item->kelurahans->updated_at
                     ] : null,
                     'tahun' => $item->tahun,
+                    'cakupan_wilayah' => $item->cakupan_wilayah,
+                    'kategori_suara' => $item->kategori_suaras,
                     'tps' => $item->tps,
                     'jumlah_suara' => $item->jumlah_suara,
+                    'dpt_laki' => $item->dpt_laki,
+                    'dpt_perempuan' => $item->dpt_perempuan,
                     'jumlah_dpt' => $item->jumlah_dpt,
                     'suara_caleg' => $item->suara_caleg ?? 'N/A',
                     'suara_partai' => $item->suara_partai ?? 'N/A',
