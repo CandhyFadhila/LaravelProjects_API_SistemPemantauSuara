@@ -86,7 +86,7 @@ class DetailMapController extends Controller
                     'created_at' => $item->created_at,
                     'updated_at' => $item->updated_at,
                 ];
-            });
+            })->values();
 
             $format_chart = $aktivitas->map(function ($item) {
                 return [
