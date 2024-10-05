@@ -79,4 +79,14 @@ class Kelurahan extends Model
     {
         return $this->hasMany(User::class, 'kelurahan_id', 'id');
     }
+
+    /**
+     * Get all of the potensi_tps for the Kelurahan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function potensi_tps(): HasMany
+    {
+        return $this->hasMany(UpcomingTps::class, 'kelurahan_id', 'id');
+    }
 }

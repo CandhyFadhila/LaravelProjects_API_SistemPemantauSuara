@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('foto_aktivitas')->nullable();
             $table->integer('rw');
             $table->integer('potensi_suara');
-            $table->integer('future_count_tps')->nullable();
             $table->foreignId('kelurahan')->constrained('kelurahans');
             $table->timestamps();
         });
