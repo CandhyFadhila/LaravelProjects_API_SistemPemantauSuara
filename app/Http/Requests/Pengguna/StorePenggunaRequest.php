@@ -26,7 +26,7 @@ class StorePenggunaRequest extends FormRequest
     {
         return [
             'nama' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username',
+            // 'username' => 'required|string|max:255|unique:users,username',
             'jenis_kelamin' => 'required|in:0,1',
             'nik_ktp' => 'required|integer|digits:16',
             'tgl_diangkat' => 'required',

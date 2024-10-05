@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Helpers\RandomHelper;
 use Illuminate\Http\Response;
 use App\Helpers\FileUploadHelper;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -130,7 +132,14 @@ class PenggunaController extends Controller
             }
 
             $data = $request->validated();
-            $password = $data['password'] ?? '12345';
+
+            $username = RandomHelper::generateUsername($data['nama']);
+            $existingUser = User::where('username', $username)->first();
+            if ($existingUser) {
+                $username .= rand(100, 999); // Tambahkan angka untuk membuat username unik
+            }
+
+            $password = $data['password'] ?? RandomHelper::generatePasswordBasic();
 
             $fotoProfilPath = null;
             if ($request->hasFile('foto_profil')) {
@@ -139,7 +148,7 @@ class PenggunaController extends Controller
 
             $user = [
                 'nama' => $data['nama'],
-                'username' => $data['username'],
+                'username' => $username,
                 'jenis_kelamin' => $data['jenis_kelamin'],
                 'nik_ktp' => $data['nik_ktp'],
                 'foto_profil' => $fotoProfilPath,
@@ -149,7 +158,17 @@ class PenggunaController extends Controller
                 'password' => Hash::make($password),
             ];
             $createUser = User::create($user);
-            $createUser->roles()->attach($data['role_id']);
+            // Ambil nama role berdasarkan role_id
+            $role = Role::find($data['role_id']);
+            if ($role) {
+                // Atur role menggunakan nama role asli
+                $createUser->syncRoles([$role->name]);
+            } else {
+                return response()->json([
+                    'status' => Response::HTTP_BAD_REQUEST,
+                    'message' => 'Role tidak ditemukan.'
+                ], Response::HTTP_BAD_REQUEST);
+            }
 
             return response()->json([
                 'status' => Response::HTTP_CREATED,
@@ -254,9 +273,20 @@ class PenggunaController extends Controller
             $user->no_hp = $validatedData['no_hp'] ?? $user->no_hp;
             $user->role_id = $validatedData['role_id'] ?? $user->role_id;
 
+            // Jika ada role_id, update role berdasarkan nama role
             if (isset($validatedData['role_id'])) {
-                $user->roles()->sync([$validatedData['role_id']]);
+                $role = Role::find($validatedData['role_id']);
+                if ($role) {
+                    // Sync dengan nama role
+                    $user->syncRoles([$role->name]);
+                } else {
+                    return response()->json([
+                        'status' => Response::HTTP_BAD_REQUEST,
+                        'message' => 'Role tidak ditemukan.'
+                    ], Response::HTTP_BAD_REQUEST);
+                }
             }
+
             $user->save();
 
             return response()->json([
