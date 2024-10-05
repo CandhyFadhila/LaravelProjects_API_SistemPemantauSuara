@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use Database\Seeders\Account\AccountSeeder;
 use Database\Seeders\Account\PermissionSeeder;
 use Database\Seeders\Account\RoleSeeder;
+use Database\Seeders\Account\StatusAktifSeeder;
 use Database\Seeders\Aktivitas\AktivitasPelaksanaSeeder;
 use Database\Seeders\Aktivitas\StatusAktivitasSeeder;
 use Database\Seeders\Kategori\KategoriSuaraSeeder;
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
+            StatusAktifSeeder::class,
             AccountSeeder::class,
 
             KategoriSuaraSeeder::class,

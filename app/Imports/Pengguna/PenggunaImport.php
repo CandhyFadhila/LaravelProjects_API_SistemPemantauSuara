@@ -80,7 +80,6 @@ class PenggunaImport implements ToModel, WithHeadingRow, WithValidation
             'tgl_diangkat' => $row['tgl_diangkat'],
             'role_id' => $role->id,
             'kelurahan_id' => $kelurahan->id,
-            'status_aktif' => true,
             'password' => Hash::make($password),
         ];
         $createUser = User::create($userData);

@@ -103,7 +103,12 @@ class PenggunaController extends Controller
                         'created_at' => $user->kelurahans->created_at,
                         'updated_at' => $user->kelurahans->updated_at
                     ] : null,
-                    'status_aktif' => $user->status_aktif,
+                    'status_aktif' => $user->status_users ? [
+                        'id' => $user->status_users->id,
+                        'label' => $user->status_users->label,
+                        'created_at' => $user->status_users->created_at,
+                        'updated_at' => $user->status_users->updated_at
+                    ] : null,
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
                 ];
@@ -228,6 +233,12 @@ class PenggunaController extends Controller
                     'created_at' => $user->kelurahans->created_at,
                     'updated_at' => $user->kelurahans->updated_at
                 ] : null,
+                'status_aktif' => $user->status_users ? [
+                    'id' => $user->status_users->id,
+                    'label' => $user->status_users->label,
+                    'created_at' => $user->status_users->created_at,
+                    'updated_at' => $user->status_users->updated_at
+                ] : null,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ];
@@ -351,6 +362,10 @@ class PenggunaController extends Controller
             if (!$user) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pengguna akun tidak ditemukan.'), Response::HTTP_NOT_FOUND);
             }
+            
+            if ($user->status_aktif === 2) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Akun pengguna sedang bersatus aktif, Jika ingin mereset password silahkan nonaktifkan akun terlebih dahulu.'), Response::HTTP_FORBIDDEN);
+            }
 
             // 2. Pengecualian 'Super Admin'
             if ($user->id == 1 || $user->nama === 'Super Admin') {
@@ -376,7 +391,7 @@ class PenggunaController extends Controller
         }
     }
 
-    // Reset by user
+    // Reset by user login
     public function updatePasswordPengguna(UpdateUserPasswordRequest $request)
     {
         try {

@@ -14,7 +14,7 @@ class PenggunaExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        return User::with(['roles', 'kelurahans'])
+        return User::with(['roles', 'kelurahans', 'status_users'])
             // ->where('status_aktif', 2)
             ->where('id', '!=', 1)
             ->get();
@@ -43,19 +43,6 @@ class PenggunaExport implements FromCollection, WithHeadings, WithMapping
         static $no = 1;
         $roles = $user->roles->pluck('name')->toArray();
 
-        $status = '';
-        switch ($user->status_aktif) {
-            case 1:
-                $status = 'Belum Diaktifkan';
-                break;
-            case 2:
-                $status = 'Aktif';
-                break;
-            case 3:
-                $status = 'Dinonaktifkan';
-                break;
-        }
-
         return [
             $no++,
             $user->nama,
@@ -64,7 +51,7 @@ class PenggunaExport implements FromCollection, WithHeadings, WithMapping
             $user->nik_ktp ?? 'N/A',
             $user->no_hp ?? 'N/A',
             $user->tgl_diangkat ?? 'N/A',
-            $status,
+            $user->status_users->label,
             implode(', ', $roles),
             $user->kelurahans->nama_kelurahan ?? 'N/A',
             $user->created_at,

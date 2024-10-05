@@ -60,4 +60,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
     }
+
+    /**
+     * Get the status_users that owns the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function status_users(): BelongsTo
+    {
+        return $this->belongsTo(StatusAktif::class, 'status_aktif', 'id');
+    }
 }

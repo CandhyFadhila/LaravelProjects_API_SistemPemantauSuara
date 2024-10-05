@@ -25,6 +25,7 @@ class UserSeeder extends Seeder
                 'no_hp' => $faker->phoneNumber,
                 'tgl_diangkat' => $faker->date(),
                 'jenis_kelamin' => $jenisKelamin,
+                'role_id' => 3,
                 'password' => Hash::make('password123'),
                 'status_aktif' => rand(1, 3),
             ]);

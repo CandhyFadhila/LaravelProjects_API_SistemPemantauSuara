@@ -25,10 +25,11 @@ class LoginController extends Controller
         }
 
         // Cek status_aktif
-        if ($user->status_aktif == 0) {
+        if (in_array($user->status_aktif, [1, 3])) {
             auth()->logout();
-            Log::info("| Auth | - Login failed for user ID: {$user->id} - Account inactive since {$user->updated_at}.");
-            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, "Kami mendeteksi bahwa akun anda tidak aktif sejak {$user->updated_at}."), Response::HTTP_FORBIDDEN);
+            $inactiveSince = $user->updated_at ?? $user->created_at;
+            Log::info("| Auth | - Login failed for user ID: {$user->id} - Account inactive since {$inactiveSince}.");
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, "Kami mendeteksi bahwa akun anda belum/tidak aktif sejak {$inactiveSince}."), Response::HTTP_FORBIDDEN);
         }
 
         Log::info("Login successful for user ID: {$user->id}, Name: {$user->nama}.");
