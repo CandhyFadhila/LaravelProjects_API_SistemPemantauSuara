@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('tahun');
             $table->integer('tps');
             $table->text('alamat');
-            $table->text('cakupan_wilayah')->nullable(); // importwww
+            $table->text('cakupan_wilayah')->nullable(); // import
             $table->foreignId('kategori_suara_id')->constrained('kategori_suaras');
             $table->integer('jumlah_suara');
             $table->integer('dpt_laki');
