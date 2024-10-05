@@ -31,7 +31,14 @@ class PermissionHelper
 				// 'create suaraKPU',
 				// 'edit suaraKPU',
 				// 'delete suaraKPU',
-				'import suaraKPU'
+				'import suaraKPU',
+
+				'create upcomingTPS',
+				'edit upcomingTPS',
+				'delete upcomingTPS',
+				'view upcomingTPS',
+				// 'import upcomingTPS',
+				// 'export upcomingTPS'
 			],
 			2 => [
 				'view publikRequest',
@@ -52,6 +59,11 @@ class PermissionHelper
 				'export aktivitas',
 
 				'view suaraKPU',
+
+				'create upcomingTPS',
+				'edit upcomingTPS',
+				'delete upcomingTPS',
+				'view upcomingTPS',
 			],
 			3 => [
 				'view publikRequest',
@@ -64,6 +76,11 @@ class PermissionHelper
 				'view aktivitas',
 				'import aktivitas',
 				'export aktivitas',
+
+				'create upcomingTPS',
+				'edit upcomingTPS',
+				'delete upcomingTPS',
+				'view upcomingTPS',
 			]
 		];
 

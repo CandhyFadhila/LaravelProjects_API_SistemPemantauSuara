@@ -4,6 +4,7 @@ use App\Http\Controllers\Dashboard\AktivitasController;
 use App\Http\Controllers\Dashboard\DetailMapController;
 use App\Http\Controllers\Dashboard\PenggunaController;
 use App\Http\Controllers\Dashboard\SuaraKPUController;
+use App\Http\Controllers\Dashboard\UpcomingTPSController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Publik\Auth\LoginController;
@@ -36,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-all-kelurahan', [PublikRequestController::class, 'getAllDataKelurahan']);
         Route::get('/get-all-aktivitas', [PublikRequestController::class, 'getAllDataAktivitas']);
         Route::get('/get-all-suara-kpu', [PublikRequestController::class, 'getAllDataSuaraKPU']);
+        Route::get('/get-all-tps-mendatang', [PublikRequestController::class, 'getAllDataUpcomingTPS']);
     });
 
     // ! Dashboard
@@ -59,14 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/export-aktivitas', [AktivitasController::class, 'exportAktivitas']);
             Route::post('/import-aktivitas', [AktivitasController::class, 'importAktivitas']);
             Route::apiResource('/aktivitas', AktivitasController::class);
+
+            Route::apiResource('/tps-mendatang', UpcomingTPSController::class);
         });
 
         // ! Monitoring Suara
         Route::prefix('monitoring')->group(function () {
             Route::post('/potensi-suara', [DetailMapController::class, 'indexPotensiSuara']);
             Route::post('/suara-kpu', [DetailMapController::class, 'indexSuaraKPU']);
-
-
             Route::get('/suara-kpu-export', [SuaraKPUController::class, 'exportKPU']);
             Route::post('/suara-kpu-import', [SuaraKPUController::class, 'importKPU']);
         });

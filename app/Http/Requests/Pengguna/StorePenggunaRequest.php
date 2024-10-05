@@ -26,7 +26,6 @@ class StorePenggunaRequest extends FormRequest
     {
         return [
             'nama' => 'required|string|max:255',
-            // 'username' => 'required|string|max:255|unique:users,username',
             'jenis_kelamin' => 'required|in:0,1',
             'nik_ktp' => 'required|integer|digits:16',
             'tgl_diangkat' => 'required',
@@ -43,10 +42,6 @@ class StorePenggunaRequest extends FormRequest
             'nama.required' => 'Nama pengguna tidak diperbolehkan kosong.',
             'nama.string' => 'Nama pengguna tidak diperbolehkan mengandung selain huruf.',
             'nama.max' => 'Nama pengguna tidak diperbolehkan melebihi 255 baris kata.',
-            'username.required' => 'Username pengguna tidak diperbolehkan kosong.',
-            'username.string' => 'Username pengguna tidak diperbolehkan mengandung selain huruf.',
-            'username.max' => 'Username tidak diperbolehkan melebihi 255 baris kata.',
-            'username.unique' => 'Username tersebut sudah pernah terdaftar, silahkan gunakan username lain.',
             'jenis_kelamin.required' => 'Jenis kelamin pengguna tidak diperbolehkan kosong.',
             'jenis_kelamin.in' => 'Jenis kelamin karyawan tidak diperbolehkan selain laki-laki atau perempuan.',
             'nik_ktp.required' => 'NIK KTP pengguna tidak diperbolehkan kosong.',
@@ -59,7 +54,6 @@ class StorePenggunaRequest extends FormRequest
             'foto_profil.max' => 'Ukuran file foto yang diperbolehkan maksimal 5 MB.',
             'role_id.required' => 'Role pengguna tidak diperbolehkan kosong.',
             'role_id.integer' => 'Role pengguna tidak diperbolehkan mengandung selain angka.',
-            // 'kelurahan_id.required' => 'Kelurahan yang diampu pengguna tidak diperbolehkan kosong.',
             'kelurahan_id.integer' => 'Kelurahan yang diampu pengguna tidak diperbolehkan mengandung selain angka.',
             'kelurahan_id.exists' => 'Kelurahan yang diampu pengguna tidak ada di database.',
         ];

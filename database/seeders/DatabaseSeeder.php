@@ -41,7 +41,6 @@ class DatabaseSeeder extends Seeder
 
             PartaiSeeder::class,
             SuaraKPUSeeder::class,
-            UpcomingTPSSeeder::class,
             JenisDataSeeder::class,
 
             StatusAktivitasSeeder::class,

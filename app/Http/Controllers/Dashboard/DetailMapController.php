@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\public\WithoutDataResource;
+use App\Models\UpcomingTps;
 
 class DetailMapController extends Controller
 {
@@ -45,6 +46,16 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data aktivitas tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                ], Response::HTTP_OK);
+            }
+
+            $upcomingTPS = UpcomingTps::whereIn('kelurahan_id', $kelurahanIds)
+                ->whereIn('tahun', $tahun)
+                ->get();
+            if ($upcomingTPS->isEmpty()) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data TPS mendatang tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
                 ], Response::HTTP_OK);
             }
 
@@ -95,12 +106,33 @@ class DetailMapController extends Controller
                 ];
             })->values();
 
+            $format_tps_mendatang = $upcomingTPS->map(function ($item) {
+                return [
+                    'kelurahan' => $item->kelurahans ? [
+                        'id' => $item->kelurahans->id,
+                        'nama_kelurahan' => $item->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $item->kelurahans->kode_kelurahan,
+                        'max_rw' => $item->kelurahans->max_rw,
+                        'kecamatan' => $item->kelurahans->kecamatans,
+                        'kabupaten' => $item->kelurahans->kabupaten_kotas,
+                        'provinsi' => $item->kelurahans->provinsis,
+                        'created_at' => $item->kelurahans->created_at,
+                        'updated_at' => $item->kelurahans->updated_at
+                    ] : null,
+                    'tahun' => $item->tahun,
+                    'jumlah_tps' => $item->jumlah_tps,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at
+                ];
+            })->values();
+
             return response()->json([
                 'status' => Response::HTTP_OK,
                 'message' => 'Data aktivitas dan chart berhasil ditampilkan.',
                 'data' => [
                     'chart' => $format_chart,
                     'table' => $format_aktivitas,
+                    'upcomingTPS' => $format_tps_mendatang,
                     'tahun' => $tahun
                 ],
             ], Response::HTTP_OK);

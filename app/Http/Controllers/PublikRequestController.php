@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Models\AktivitasPelaksana;
 use App\Models\SuaraKPU;
+use App\Models\UpcomingTps;
 
 class PublikRequestController extends Controller
 {
@@ -25,7 +26,7 @@ class PublikRequestController extends Controller
             }
 
             $loggedInUser = Auth::user();
-            $roles = Role::all();
+            $roles = Role::orderBy('created_at', 'desc')->get();
             if ($roles->isEmpty()) {
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
@@ -41,7 +42,7 @@ class PublikRequestController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Retrieving all roles for dropdown',
+                'message' => 'Retrieving all roles',
                 'data' => $roles->values()
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -63,12 +64,13 @@ class PublikRequestController extends Controller
             $loggedInUser = auth()->user();
 
             if ($loggedInUser->nama !== 'Super Admin') {
-                $users = User::where('nama', '!=', 'Super Admin')
+                $users = User::orderBy('created_at', 'desc')
+                    ->where('nama', '!=', 'Super Admin')
                     ->where('id', '!=', 1)
                     ->where('status_aktif', 2)
                     ->get();
             } else {
-                $users = User::where('status_aktif', 2)->get();
+                $users = User::orderBy('created_at', 'desc')->where('status_aktif', 2)->get();
             }
 
             if ($users->isEmpty()) {
@@ -156,7 +158,7 @@ class PublikRequestController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Retrieving all kecamatans for dropdown',
+                'message' => 'Retrieving all kecamatans',
                 'data' => $formattedData
             ]);
         } catch (\Exception $e) {
@@ -199,7 +201,7 @@ class PublikRequestController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Retrieving all kelurahans for dropdown',
+                'message' => 'Retrieving all kelurahans',
                 'data' => $formattedData
             ]);
         } catch (\Exception $e) {
@@ -218,7 +220,7 @@ class PublikRequestController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
-            $aktivitas = AktivitasPelaksana::all();
+            $aktivitas = AktivitasPelaksana::orderBy('created_at', 'desc')->get();
             if ($aktivitas->isEmpty()) {
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
@@ -266,7 +268,7 @@ class PublikRequestController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Retrieving all aktivitas for dropdown',
+                'message' => 'Retrieving all aktivitas',
                 'data' => $formattedData
             ]);
         } catch (\Exception $e) {
@@ -285,7 +287,7 @@ class PublikRequestController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
-            $suara_kpu = SuaraKPU::all();
+            $suara_kpu = SuaraKPU::orderBy('created_at', 'desc')->get();
             if ($suara_kpu->isEmpty()) {
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
@@ -329,7 +331,57 @@ class PublikRequestController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => 'Retrieving all suara kpu for dropdown',
+                'message' => 'Retrieving all suara kpu',
+                'data' => $formattedData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('| Publik Request | - Error function getAllDataSuaraKPU: ' . $e->getMessage());
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getAllDataUpcomingTPS()
+    {
+        try {
+            if (!Gate::allows('view upcomingTPS')) {
+                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+            }
+
+            $prakiraan_tps = UpcomingTps::orderBy('created_at', 'desc')->get();
+            if ($prakiraan_tps->isEmpty()) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data prakiraan tps tidak ditemukan.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $formattedData = $prakiraan_tps->map(function ($prakiraan_tps) {
+                return [
+                    'id' => $prakiraan_tps->id,
+                    'kelurahan' => $prakiraan_tps->kelurahans ? [
+                        'id' => $prakiraan_tps->kelurahans->id,
+                        'nama_kelurahan' => $prakiraan_tps->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $prakiraan_tps->kelurahans->kode_kelurahan,
+                        'max_rw' => $prakiraan_tps->kelurahans->max_rw,
+                        'kecamatan' => $prakiraan_tps->kelurahans->kecamatans,
+                        'kabupaten' => $prakiraan_tps->kelurahans->kabupaten_kotas,
+                        'provinsi' => $prakiraan_tps->kelurahans->provinsis,
+                        'created_at' => $prakiraan_tps->kelurahans->created_at,
+                        'updated_at' => $prakiraan_tps->kelurahans->updated_at
+                    ] : null,
+                    'tahun' => $prakiraan_tps->tahun,
+                    'jumlah_tps' => $prakiraan_tps->jumlah_tps,
+                    'created_at' => $prakiraan_tps->created_at,
+                    'updated_at' => $prakiraan_tps->updated_at,
+                ];
+            });
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => 'Retrieving all data prakiraan tps',
                 'data' => $formattedData
             ]);
         } catch (\Exception $e) {
