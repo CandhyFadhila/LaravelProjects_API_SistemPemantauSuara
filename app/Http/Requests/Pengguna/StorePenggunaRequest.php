@@ -27,7 +27,7 @@ class StorePenggunaRequest extends FormRequest
         return [
             'nama' => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:0,1',
-            'nik_ktp' => 'required|integer|digits:16',
+            'nik_ktp' => 'required|integer|digits:16|unique:users,nik_ktp',
             'tgl_diangkat' => 'required',
             'no_hp' => 'nullable|max:50',
             'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:5048',
@@ -48,6 +48,7 @@ class StorePenggunaRequest extends FormRequest
             'nik_ktp.required' => 'NIK KTP pengguna tidak diperbolehkan kosong.',
             'nik_ktp.integer' => 'NIK KTP pengguna tidak diperbolehkan mengandung selain angka.',
             'nik_ktp.digits' => 'NIK KTP pengguna melebihi batas maksimum panjang 16 karakter.',
+            'nik_ktp.unique' => 'NIK KTP yang diberikan sudah pernah terdaftar di sistem Pemantau Suara.',
             'tgl_diangkat.required' => 'Tanggal masuk pengguna tidak diperbolehkan kosong.',
             'no_hp.max' => 'Nomor telepon pengguna tidak diperbolehkan melebihi 255 baris angka.',
             'foto_profil.image' => 'Foto profil pengguna harus berupa gambar.',

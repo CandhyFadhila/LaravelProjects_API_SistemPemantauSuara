@@ -277,8 +277,7 @@ class PenggunaController extends Controller
 
         return response()->json([
             'status' => Response::HTTP_CREATED,
-            'message' => "Pengguna baru '{$createUser->nama}' berhasil ditambahkan.",
-            'data' => $createUser
+            'message' => "Pengguna baru '{$createUser->nama}' berhasil ditambahkan."
         ], Response::HTTP_CREATED);
     }
 
@@ -504,6 +503,13 @@ class PenggunaController extends Controller
                 $penggerak->save();
             }
             $message .= " Semua pengguna dengan role Penggerak dari Penanggung Jawab '{$user->nama}' juga dinonaktifkan.";
+        } elseif ($user->role_id == 2 && $user->status_aktif === 2) {
+            $penggerakUsers = User::where('role_id', 3)->where('pj_pelaksana', $user->id)->get();
+            foreach ($penggerakUsers as $penggerak) {
+                $penggerak->status_aktif = 2;
+                $penggerak->save();
+            }
+            $message .= " Semua pengguna dengan role Penggerak dari Penanggung Jawab '{$user->nama}' juga diaktifkan.";
         }
 
         return response()->json(new WithoutDataResource(Response::HTTP_OK, $message), Response::HTTP_OK);
