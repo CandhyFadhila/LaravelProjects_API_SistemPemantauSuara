@@ -29,8 +29,9 @@ class PublikRequestController extends Controller
         if ($roles->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data role tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data role tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         if ($loggedInUser->nama !== 'Super Admin') {
@@ -68,7 +69,8 @@ class PublikRequestController extends Controller
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Data pengguna tidak ditemukan.',
-            ], Response::HTTP_NOT_FOUND);
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $users->map(function ($user) {
@@ -182,14 +184,16 @@ class PublikRequestController extends Controller
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Pengguna dengan role Penggerak tidak ditemukan.',
-            ], Response::HTTP_NOT_FOUND);
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         if ($users->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Data pengguna tidak ditemukan.',
-            ], Response::HTTP_NOT_FOUND);
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $users->map(function ($user) {
@@ -301,8 +305,9 @@ class PublikRequestController extends Controller
         if ($kecamatan->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data kecamatan tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data kecamatan tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $kecamatan->map(function ($kecamatan) {
@@ -334,8 +339,9 @@ class PublikRequestController extends Controller
         if ($kelurahan->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data kelurahan tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data kelurahan tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $kelurahan->map(function ($kelurahan) {
@@ -369,7 +375,8 @@ class PublikRequestController extends Controller
         if (empty($loggedInUser->kelurahan_id)) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Tidak ada kelurahan yang terkait dengan pengguna ini.'
+                'message' => 'Tidak ada kelurahan yang terkait dengan pengguna ini.',
+                'data' => []
             ], Response::HTTP_OK);
         }
 
@@ -377,7 +384,8 @@ class PublikRequestController extends Controller
         if ($kelurahans->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Kelurahan tidak ditemukan.'
+                'message' => 'Kelurahan tidak ditemukan.',
+                'data' => []
             ], Response::HTTP_OK);
         }
 
@@ -412,8 +420,9 @@ class PublikRequestController extends Controller
         if ($aktivitas->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data aktivitas tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data aktivitas tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $aktivitas->map(function ($aktivitas) {
@@ -471,8 +480,9 @@ class PublikRequestController extends Controller
         if ($suara_kpu->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data suara kpu tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data suara kpu tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $suara_kpu->map(function ($suara_kpu) {
@@ -526,8 +536,9 @@ class PublikRequestController extends Controller
         if ($prakiraan_tps->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data prakiraan tps tidak ditemukan.'
-            ], Response::HTTP_NOT_FOUND);
+                'message' => 'Data prakiraan tps tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
         $formattedData = $prakiraan_tps->map(function ($prakiraan_tps) {
