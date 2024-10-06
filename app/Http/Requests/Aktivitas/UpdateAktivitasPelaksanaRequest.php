@@ -34,9 +34,9 @@ class UpdateAktivitasPelaksanaRequest extends FormRequest
             'tgl_selesai' => 'required|string',
             'tempat_aktivitas' => 'required|string',
             'potensi_suara' => 'required|integer',
-            'foto_aktivitas' => $this->hasFile('dokumen')
+            'foto_aktivitas' => $this->hasFile('foto_aktivitas')
                 ? 'required|image|mimes:jpeg,png,jpg|max:10240'  // Validasi untuk file
-                : 'required',
+                : 'nullable',
         ];
     }
 
