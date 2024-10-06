@@ -382,10 +382,14 @@ class AktivitasController extends Controller
         $aktivitas->tempat_aktivitas = $validatedData['tempat_aktivitas'] ?? $aktivitas->tempat_aktivitas;
         $aktivitas->potensi_suara = $validatedData['potensi_suara'] ?? $aktivitas->potensi_suara;
 
-        // jika sudah didalam range tgl mulai dan tgl selesai maka status aktivitas = 2,
-        // jika diluar tgl mulai maka status aktivitas = 1
-        // jika diluar tgl selesai maka status aktivitas = 3
-
+        $currentDate = now('Asia/Jakarta');
+        if ($currentDate->between($aktivitas->tgl_mulai, $aktivitas->tgl_selesai)) {
+            $aktivitas->status_aktivitas = 2;
+        } elseif ($currentDate->lt($aktivitas->tgl_mulai)) {
+            $aktivitas->status_aktivitas = 1;
+        } elseif ($currentDate->gt($aktivitas->tgl_selesai)) {
+            $aktivitas->status_aktivitas = 3;
+        }
 
         // Jika ada file foto aktivitas baru, simpan dan hapus yang lama
         if ($request->hasFile('foto_aktivitas')) {
