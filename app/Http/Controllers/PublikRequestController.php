@@ -365,14 +365,18 @@ class PublikRequestController extends Controller
         ]);
     }
 
-    public function getKelurahanByLogginUser()
+    public function getKelurahanUserId($userId)
     {
-        if (!Gate::allows('view publikRequest')) {
-            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Pengguna tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
         }
 
-        $loggedInUser = Auth::user();
-        if (empty($loggedInUser->kelurahan_id)) {
+        if (empty($user->kelurahan_id)) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Tidak ada kelurahan yang terkait dengan pengguna ini.',
@@ -380,7 +384,7 @@ class PublikRequestController extends Controller
             ], Response::HTTP_OK);
         }
 
-        $kelurahans = Kelurahan::whereIn('id', $loggedInUser->kelurahan_id)->get();
+        $kelurahans = Kelurahan::whereIn('id', $user->kelurahan_id)->get();
         if ($kelurahans->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
@@ -405,7 +409,7 @@ class PublikRequestController extends Controller
 
         return response()->json([
             'status' => Response::HTTP_OK,
-            'message' => 'Data kelurahan berhasil diambil.',
+            'message' => "Data kelurahan dari pengguna '{$user->nama}' berhasil diambil.",
             'data' => $formattedKelurahans
         ], Response::HTTP_OK);
     }

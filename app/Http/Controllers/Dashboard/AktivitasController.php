@@ -66,7 +66,10 @@ class AktivitasController extends Controller
             }
 
             $formattedData = $data_aktivitas->map(function ($aktivitas) {
+                $role = $aktivitas->pelaksana_users->roles->first();
                 $pelaksana = $aktivitas->pelaksana_users;
+                $kelurahanIds = $pelaksana ? $pelaksana->kelurahan_id ?? null : null;
+                $kelurahanData = null;
 
                 if (!empty($kelurahanIds)) {
                     $kelurahanData = Kelurahan::whereIn('id', $kelurahanIds)->get()->map(function ($kelurahan) {
@@ -135,9 +138,17 @@ class AktivitasController extends Controller
                         'foto_profil' =>  $aktivitas->pelaksana_users->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $aktivitas->pelaksana_users->foto_profil : null,
                         'tgl_diangkat' => $aktivitas->pelaksana_users->tgl_diangkat,
                         'jenis_kelamin' => $aktivitas->pelaksana_users->jenis_kelamin,
-                        'role_id' => $aktivitas->pelaksana_users->role_id,
-                        'status_aktif' => $aktivitas->pelaksana_users->status_aktif,
-
+                        'role' => $role ? [
+                            'id' => $role->id,
+                            'name' => $role->name,
+                            'deskripsi' => $role->deskripsi,
+                            'created_at' => $role->created_at,
+                            'updated_at' => $role->updated_at,
+                        ] : null,
+                        'status_aktif' => $pelaksana->status_aktif,
+                        'kelurahan' => $kelurahanData,
+                        'rw_pelaksana' => $aktivitas->pelaksana_users->rw_pelaksana ?? null,
+                        'pj_pelaksana' => $pjPelaksanaData,
                         'created_at' => $aktivitas->pelaksana_users->created_at,
                         'updated_at' => $aktivitas->pelaksana_users->updated_at
                     ] : null,
