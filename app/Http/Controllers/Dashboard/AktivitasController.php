@@ -379,7 +379,8 @@ class AktivitasController extends Controller
         $aktivitas->tgl_mulai = $validatedData['tgl_mulai'] ?? $aktivitas->tgl_mulai;
         $aktivitas->tgl_selesai = $validatedData['tgl_selesai'] ?? $aktivitas->tgl_selesai;
         $aktivitas->tempat_aktivitas = $validatedData['tempat_aktivitas'] ?? $aktivitas->tempat_aktivitas;
-        $aktivitas->status = $validatedData['potensi_suara'] ?? $aktivitas->potensi_suara;
+        $aktivitas->potensi_suara = $validatedData['potensi_suara'] ?? $aktivitas->potensi_suara;
+        $aktivitas->status_aktivitas = $validatedData['status_aktivitas'] ?? $aktivitas->status_aktivitas;
 
         // Jika ada file foto aktivitas baru, simpan dan hapus yang lama
         if ($request->hasFile('foto_aktivitas')) {
