@@ -399,8 +399,24 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $validatedData = $request->validated();
+        $loggedInUser = Auth::user();
         $user = User::findOrFail($id);
+
+        if ($loggedInUser->role_id == 1 && $user->role_id != 2) {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Super Admin hanya bisa mengedit pengguna dengan peran Penanggung Jawab.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        if ($loggedInUser->role_id == 2 && $user->role_id != 3) {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Penanggung Jawab hanya bisa mengedit pengguna dengan peran Penggerak.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $validatedData = $request->validated();
 
         if ($request->hasFile('foto_profil')) {
             // Hapus foto lama jika ada
@@ -461,6 +477,8 @@ class PenggunaController extends Controller
         if (!Gate::allows('aktifkan pengguna')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
+
+        // jika super admin menonaktifkan role = 2 (PJ), maka user yang memiliki role = 3 dengan PJ (yang dinonaktifkan admin) ikut tidak aktif
 
         $user = User::where('id', '!=', 1)->find($id);
         if (!$user) {
