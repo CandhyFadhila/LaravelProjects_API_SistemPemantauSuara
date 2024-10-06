@@ -44,12 +44,12 @@ class PermissionHelper
 				'view publikRequest',
 
 				'aktifkan pengguna',
-				'reset password',
 				'update password',
 
 				'create pengguna',
 				'edit pengguna',
 				'view pengguna',
+				'export pengguna',
 
 				'create aktivitas',
 				'edit aktivitas',

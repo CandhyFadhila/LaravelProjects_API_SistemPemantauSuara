@@ -24,6 +24,9 @@ return new class extends Migration
             $table->foreignId('status_aktif')->default(2)->constrained('status_aktifs'); // 1 = non aktif, 2 = aktif, 3 = dinonaktifkan
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->integer('pj_pelaksana')->nullable();
+            $table->text('kelurahan_id')->nullable();
+            $table->text('rw_pelaksana')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

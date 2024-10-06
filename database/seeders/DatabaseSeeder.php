@@ -32,12 +32,12 @@ class DatabaseSeeder extends Seeder
 
             KategoriSuaraSeeder::class,
 
-            UserSeeder::class,
-
             ProvinsiSeeder::class,
             KabupatenSeeder::class,
             KecamatanSeeder::class,
             KelurahanSeeder::class,
+
+            UserSeeder::class,
 
             PartaiSeeder::class,
             SuaraKPUSeeder::class,

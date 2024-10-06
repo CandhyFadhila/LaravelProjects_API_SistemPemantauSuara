@@ -38,7 +38,9 @@ class User extends Authenticatable
         'password' => 'hashed',
         'role_id' => 'integer',
         'status_aktif' => 'integer',
-        'kelurahan_id' => 'integer',
+        'pj_pelaksana' => 'integer',
+        'kelurahan_id' => 'array',
+        'rw_pelaksana' => 'array'
     ];
 
     /**
@@ -49,16 +51,6 @@ class User extends Authenticatable
     public function aktivitas_users(): HasMany
     {
         return $this->hasMany(AktivitasPelaksana::class, 'pelaksana', 'id');
-    }
-
-    /**
-     * Get the keluarahans that owns the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function kelurahans(): BelongsTo
-    {
-        return $this->belongsTo(Kelurahan::class, 'kelurahan_id', 'id');
     }
 
     /**

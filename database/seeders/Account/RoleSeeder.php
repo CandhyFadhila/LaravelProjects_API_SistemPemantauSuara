@@ -34,12 +34,13 @@ class RoleSeeder extends Seeder
         ]);
         $rolePJ->givePermissionTo(PermissionHelper::getPermissionsByRole(2));
 
-        $rolePelaksana = Role::create([
-            'name' => 'Pelaksana',
-            'deskripsi' => 'Ini adalah role pelaksana',
+        $rolePenggerak = Role::create([
+            // 'name' => 'Pelaksana',
+            'name' => 'Penggerak',
+            'deskripsi' => 'Ini adalah role Penggerak',
             'created_at' => $created_at,
             'updated_at' => $updated_at,
         ]);
-        $rolePelaksana->givePermissionTo(PermissionHelper::getPermissionsByRole(3));
+        $rolePenggerak->givePermissionTo(PermissionHelper::getPermissionsByRole(3));
     }
 }

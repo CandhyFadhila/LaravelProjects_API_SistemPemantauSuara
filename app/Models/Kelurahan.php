@@ -71,16 +71,6 @@ class Kelurahan extends Model
     }
 
     /**
-     * Get all of the users for the Kelurahan
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'kelurahan_id', 'id');
-    }
-
-    /**
      * Get all of the potensi_tps for the Kelurahan
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

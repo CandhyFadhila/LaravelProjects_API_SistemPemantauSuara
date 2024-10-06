@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Models\User;
+use App\Models\Kelurahan;
 use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,12 +14,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\Aktivitas\AktivitasExport;
+use App\Imports\Aktivitas\AktivitasImport;
 use App\Helpers\Filters\AktivitasFilterHelper;
-use App\Http\Requests\Aktivitas\ImportAktivitasRequest;
 use App\Http\Resources\public\WithoutDataResource;
+use App\Http\Requests\Aktivitas\ImportAktivitasRequest;
 use App\Http\Requests\Aktivitas\StoreAktivitasPelaksanaRequest;
 use App\Http\Requests\Aktivitas\UpdateAktivitasPelaksanaRequest;
-use App\Imports\Aktivitas\AktivitasImport;
 
 class AktivitasController extends Controller
 {
@@ -64,6 +66,65 @@ class AktivitasController extends Controller
             }
 
             $formattedData = $data_aktivitas->map(function ($aktivitas) {
+                $pelaksana = $aktivitas->pelaksana_users;
+
+                if (!empty($kelurahanIds)) {
+                    $kelurahanData = Kelurahan::whereIn('id', $kelurahanIds)->get()->map(function ($kelurahan) {
+                        return [
+                            'id' => $kelurahan->id,
+                            'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                            'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                            'max_rw' => $kelurahan->max_rw,
+                            'provinsi' => $kelurahan->provinsis,
+                            'kabupaten' => $kelurahan->kabupaten_kotas,
+                            'kecamatan' => $kelurahan->kecamatans,
+                            'created_at' => $kelurahan->created_at,
+                            'updated_at' => $kelurahan->updated_at
+                        ];
+                    });
+                }
+
+                $pjPelaksana = $pelaksana && $pelaksana->pj_pelaksana ? User::find($pelaksana->pj_pelaksana) : null;
+                $pjPelaksanaData = $pjPelaksana ? [
+                    'id' => $pjPelaksana->id,
+                    'nama' => $pjPelaksana->nama,
+                    'username' => $pjPelaksana->username,
+                    'jenis_kelamin' => $pjPelaksana->jenis_kelamin,
+                    'foto_profil' => $pjPelaksana->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $pjPelaksana->foto_profil : null,
+                    'nik_ktp' => $pjPelaksana->nik_ktp,
+                    'no_hp' => $pjPelaksana->no_hp,
+                    'tgl_diangkat' => $pjPelaksana->tgl_diangkat,
+                    'role' => $pjPelaksana->roles->first() ? [
+                        'id' => $pjPelaksana->roles->first()->id,
+                        'name' => $pjPelaksana->roles->first()->name,
+                        'deskripsi' => $pjPelaksana->roles->first()->deskripsi,
+                        'created_at' => $pjPelaksana->roles->first()->created_at,
+                        'updated_at' => $pjPelaksana->roles->first()->updated_at,
+                    ] : null,
+                    'kelurahan' => $pjPelaksana->kelurahan_id ? Kelurahan::whereIn('id', $pjPelaksana->kelurahan_id)->get()->map(function ($kelurahan) {
+                        return [
+                            'id' => $kelurahan->id,
+                            'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                            'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                            'max_rw' => $kelurahan->max_rw,
+                            'provinsi' => $kelurahan->provinsis,
+                            'kabupaten' => $kelurahan->kabupaten_kotas,
+                            'kecamatan' => $kelurahan->kecamatans,
+                            'created_at' => $kelurahan->created_at,
+                            'updated_at' => $kelurahan->updated_at
+                        ];
+                    }) : null,
+                    'rw_pelaksana' => $pjPelaksana->rw_pelaksana ?? null,
+                    'status_aktif' => $pjPelaksana->status_users ? [
+                        'id' => $pjPelaksana->status_users->id,
+                        'label' => $pjPelaksana->status_users->label,
+                        'created_at' => $pjPelaksana->status_users->created_at,
+                        'updated_at' => $pjPelaksana->status_users->updated_at
+                    ] : null,
+                    'created_at' => $pjPelaksana->created_at,
+                    'updated_at' => $pjPelaksana->updated_at
+                ] : null;
+
                 return [
                     'id' => $aktivitas->id,
                     'pelaksana' => $aktivitas->pelaksana_users ? [
@@ -76,6 +137,7 @@ class AktivitasController extends Controller
                         'jenis_kelamin' => $aktivitas->pelaksana_users->jenis_kelamin,
                         'role_id' => $aktivitas->pelaksana_users->role_id,
                         'status_aktif' => $aktivitas->pelaksana_users->status_aktif,
+
                         'created_at' => $aktivitas->pelaksana_users->created_at,
                         'updated_at' => $aktivitas->pelaksana_users->updated_at
                     ] : null,

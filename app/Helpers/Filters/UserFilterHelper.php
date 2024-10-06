@@ -27,6 +27,17 @@ class UserFilterHelper
 			$query->whereYear('tgl_diangkat', '<=', $periode);
 		}
 
+		// Filter kelurahan berdasarkan kelurahan_id array
+		if (isset($filters['kelurahan_id']) && is_array($filters['kelurahan_id'])) {
+			$kelurahanIds = $filters['kelurahan_id'];
+			$query->where(function ($query) use ($kelurahanIds) {
+				foreach ($kelurahanIds as $kelurahanId) {
+					// Gunakan JSON_CONTAINS untuk memeriksa kelurahan_id yang tersimpan sebagai array JSON
+					$query->orWhereRaw("JSON_CONTAINS(kelurahan_id, '\"$kelurahanId\"')");
+				}
+			});
+		}
+
 		// Filter pencarian
 		if (isset($filters['search']) && is_array($filters['search'])) {
 			$query->where(function ($query) use ($filters) {

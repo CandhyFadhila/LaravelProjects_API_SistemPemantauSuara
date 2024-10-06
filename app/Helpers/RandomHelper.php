@@ -19,7 +19,7 @@ class RandomHelper
 
 	public static function generatePasswordBasic(): string
 	{
-		$passwordBasic = "semarang_hebat";
+		$passwordBasic = "bocahe_dewe";
 		return $passwordBasic;
 	}
 

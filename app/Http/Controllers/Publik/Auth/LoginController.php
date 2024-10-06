@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Publik\Auth;
 
 use App\Models\User;
+use App\Models\Kelurahan;
 use Illuminate\Support\Str;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -40,6 +41,69 @@ class LoginController extends Controller
         $token = $user->createToken('create_token_' . Str::uuid())->plainTextToken;
 
         $role = $user->roles->first();
+
+        $kelurahanIds = $user->kelurahan_id ?? null;
+        $rwPelaksana = $user->rw_pelaksana ?? null;
+
+        // Jika ada kelurahan_id, ambil detail kelurahan dari database
+        $kelurahanDetails = null;
+        if (!empty($kelurahanIds)) {
+            $kelurahanDetails = Kelurahan::whereIn('id', $kelurahanIds)->get()->map(function ($kelurahan) {
+                return [
+                    'id' => $kelurahan->id,
+                    'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                    'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                    'max_rw' => $kelurahan->max_rw,
+                    'provinsi' => $kelurahan->provinsis,
+                    'kabupaten' => $kelurahan->kabupaten_kotas,
+                    'kecamatan' => $kelurahan->kecamatans,
+                    'created_at' => $kelurahan->created_at,
+                    'updated_at' => $kelurahan->updated_at
+                ];
+            });
+        }
+
+        $pjPelaksana = $user->pj_pelaksana ? User::find($user->pj_pelaksana) : null;
+        $pjPelaksanaData = $pjPelaksana ? [
+            'id' => $pjPelaksana->id,
+            'nama' => $pjPelaksana->nama,
+            'username' => $pjPelaksana->username,
+            'jenis_kelamin' => $pjPelaksana->jenis_kelamin,
+            'foto_profil' => $pjPelaksana->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $pjPelaksana->foto_profil : null,
+            'nik_ktp' => $pjPelaksana->nik_ktp,
+            'no_hp' => $pjPelaksana->no_hp,
+            'tgl_diangkat' => $pjPelaksana->tgl_diangkat,
+            'role' => $pjPelaksana->roles->first() ? [
+                'id' => $pjPelaksana->roles->first()->id,
+                'name' => $pjPelaksana->roles->first()->name,
+                'deskripsi' => $pjPelaksana->roles->first()->deskripsi,
+                'created_at' => $pjPelaksana->roles->first()->created_at,
+                'updated_at' => $pjPelaksana->roles->first()->updated_at,
+            ] : null,
+            'kelurahan' => $pjPelaksana->kelurahan_id ? Kelurahan::whereIn('id', $pjPelaksana->kelurahan_id)->get()->map(function ($kelurahan) {
+                return [
+                    'id' => $kelurahan->id,
+                    'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                    'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                    'max_rw' => $kelurahan->max_rw,
+                    'provinsi' => $kelurahan->provinsis,
+                    'kabupaten' => $kelurahan->kabupaten_kotas,
+                    'kecamatan' => $kelurahan->kecamatans,
+                    'created_at' => $kelurahan->created_at,
+                    'updated_at' => $kelurahan->updated_at
+                ];
+            }) : null,
+            'rw_pelaksana' => $pjPelaksana->rw_pelaksana ?? null,
+            'status_aktif' => $pjPelaksana->status_users ? [
+                'id' => $pjPelaksana->status_users->id,
+                'label' => $pjPelaksana->status_users->label,
+                'created_at' => $pjPelaksana->status_users->created_at,
+                'updated_at' => $pjPelaksana->status_users->updated_at
+            ] : null,
+            'created_at' => $pjPelaksana->created_at,
+            'updated_at' => $pjPelaksana->updated_at
+        ] : null;
+
         return response()->json([
             'status' => Response::HTTP_OK,
             'message' => "Login berhasil! Selamat datang '{$user->nama}'.",
@@ -61,7 +125,15 @@ class LoginController extends Controller
                         'updated_at' => $role->updated_at,
                     ] : null,
                     'is_admin' => $isAdmin,
-                    'status_aktif' => $user->status_aktif,
+                    'kelurahan' => $kelurahanDetails,
+                    'rw_pelaksana' => $rwPelaksana,
+                    'pj_pelaksana' => $pjPelaksanaData,
+                    'status_aktif' => $user->status_users ? [
+                        'id' => $user->status_users->id,
+                        'label' => $user->status_users->label,
+                        'created_at' => $user->status_users->created_at,
+                        'updated_at' => $user->status_users->updated_at
+                    ] : null,
                     'permission' => $role ? $role->permissions->pluck('id') : [],
                     'created_at' => $user->created_at,
                     'updated_at' => $user->updated_at,
