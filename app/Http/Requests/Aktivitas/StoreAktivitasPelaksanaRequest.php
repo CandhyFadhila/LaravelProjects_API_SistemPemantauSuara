@@ -25,7 +25,7 @@ class StoreAktivitasPelaksanaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kelurahan_id' => 'required|integer|exists:kelurahans,id',
+            'kelurahan_id' => 'required',
             'rw' => 'required|integer',
             'pelaksana_id' => 'required|integer|exists:users,id',
             'deskripsi' => 'nullable|string',
@@ -41,8 +41,6 @@ class StoreAktivitasPelaksanaRequest extends FormRequest
     {
         return [
             'kelurahan_id.required' => 'Silahkan pilih kelurahan terlebih dahulu.',
-            'kelurahan_id.integer' => 'Kelurahan tidak diperbolehkan mengandung selain angka.',
-            'kelurahan_id.exists' => 'Kelurahan tersebut tidak ada dalam database.',
             'rw.required' => 'Lokasi RW tidak diperbolehkan kosong.',
             'rw.integer' => 'Lokasi RW tidak diperbolehkan mengandung selain angka.',
             'pelaksana_id.required' => 'Nama pelaksana tidak diperbolehkan kosong.',

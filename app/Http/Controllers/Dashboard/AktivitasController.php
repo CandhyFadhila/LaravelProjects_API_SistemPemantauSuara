@@ -189,14 +189,20 @@ class AktivitasController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = Auth::user();
-
         $validatedData = $request->validated();
 
         // Handle file upload untuk foto aktivitas
         $fotoAktivitasPath = null;
         if ($request->hasFile('foto_aktivitas')) {
             $fotoAktivitasPath = FileUploadHelper::storePhoto($request->file('foto_aktivitas'), 'aktivitas');
+        }
+
+        $kelurahan = Kelurahan::where('kode_kelurahan', $validatedData['kelurahan_id'])->first();
+        if (!$kelurahan) {
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => "Kelurahan dengan kode '{$validatedData['kelurahan_id']}' tidak ditemukan."
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         // Simpan data aktivitas
@@ -210,7 +216,7 @@ class AktivitasController extends Controller
             'foto_aktivitas' => $fotoAktivitasPath,
             'rw' => $validatedData['rw'],
             'potensi_suara' => $validatedData['potensi_suara'],
-            'kelurahan' => $validatedData['kelurahan_id'],
+            'kelurahan' => $kelurahan->id,
         ]);
 
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);

@@ -478,8 +478,6 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        // jika super admin menonaktifkan role = 2 (PJ), maka user yang memiliki role = 3 dengan PJ (yang dinonaktifkan admin) ikut tidak aktif
-
         $user = User::where('id', '!=', 1)->find($id);
         if (!$user) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pengguna tidak ditemukan.'), Response::HTTP_NOT_FOUND);
@@ -496,8 +494,17 @@ class PenggunaController extends Controller
             $user->status_aktif = 2; // Aktifkan kembali
             $message = "Pengguna '{$user->nama}' berhasil diaktifkan kembali.";
         }
-
         $user->save();
+
+        if ($user->role_id == 2 && $user->status_aktif === 3) {
+            $penggerakUsers = User::where('role_id', 3)->where('pj_pelaksana', $user->id)->get();
+            foreach ($penggerakUsers as $penggerak) {
+                $penggerak->status_aktif = 3;
+                $penggerak->save();
+            }
+            $message .= " Semua pengguna dengan role Penggerak dari Penanggung Jawab '{$user->nama}' juga dinonaktifkan.";
+        }
+
         return response()->json(new WithoutDataResource(Response::HTTP_OK, $message), Response::HTTP_OK);
     }
 
