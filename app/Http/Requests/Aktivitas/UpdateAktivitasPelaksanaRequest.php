@@ -34,7 +34,9 @@ class UpdateAktivitasPelaksanaRequest extends FormRequest
             'tgl_selesai' => 'required|string',
             'tempat_aktivitas' => 'required|string',
             'potensi_suara' => 'required|integer',
-            'foto_aktivitas' => 'required|image|mimes:jpeg,png,jpg|max:5048',
+            'foto_aktivitas' => $this->hasFile('dokumen')
+                ? 'required|image|mimes:jpeg,png,jpg|max:10240'  // Validasi untuk file
+                : 'required',
         ];
     }
 
@@ -61,7 +63,7 @@ class UpdateAktivitasPelaksanaRequest extends FormRequest
             'foto_aktivitas.required' => 'Bukti foto aktivitas tidak diperbolehkan kosong.',
             'foto_aktivitas.image' => 'Foto aktivitas harus berupa gambar.',
             'foto_aktivitas.mimes' => 'Tipe file foto yang diperbolehkan hanya jpg, jpeg, dan png.',
-            'foto_aktivitas.max' => 'Ukuran file foto yang diperbolehkan maksimal 5 MB.',
+            'foto_aktivitas.max' => 'Ukuran file foto yang diperbolehkan maksimal 10 MB.',
             'potensi_suara.required' => 'Potensi suara yang didapat tidak diperbolehkan kosong.',
             'potensi_suara.integer' => 'Potensi suara yang didapat tidak diperbolehkan mengandung selain angka.',
         ];

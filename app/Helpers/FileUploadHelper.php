@@ -19,8 +19,9 @@ class FileUploadHelper
 	{
 		$extension = $file->getClientOriginalExtension();
 		$filename = Str::random(25) . '.' . $extension;
-		$filePath = $file->storeAs($directory, $filename, 'public');
-		return $filePath;
+		$destinationPath = public_path($directory);
+		$file->move($destinationPath, $filename);
+		return $directory . '/' . $filename;
 	}
 
 	/**
@@ -31,8 +32,9 @@ class FileUploadHelper
 	 */
 	public static function deletePhoto($filePath)
 	{
-		if (Storage::disk('public')->exists($filePath)) {
-			Storage::disk('public')->delete($filePath);
+		$fullPath = public_path($filePath);
+		if (file_exists($fullPath)) {
+			unlink($fullPath);
 		}
 	}
 }
