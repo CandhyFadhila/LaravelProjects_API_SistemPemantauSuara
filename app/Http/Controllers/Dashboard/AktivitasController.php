@@ -62,6 +62,7 @@ class AktivitasController extends Controller
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Data aktivitas tidak ditemukan.',
+                'data' => []
             ], Response::HTTP_OK);
         }
 
@@ -380,11 +381,14 @@ class AktivitasController extends Controller
         $aktivitas->tgl_selesai = $validatedData['tgl_selesai'] ?? $aktivitas->tgl_selesai;
         $aktivitas->tempat_aktivitas = $validatedData['tempat_aktivitas'] ?? $aktivitas->tempat_aktivitas;
         $aktivitas->potensi_suara = $validatedData['potensi_suara'] ?? $aktivitas->potensi_suara;
-        $aktivitas->status_aktivitas = $validatedData['status_aktivitas'] ?? $aktivitas->status_aktivitas;
+
+        // jika sudah didalam range tgl mulai dan tgl selesai maka status aktivitas = 2,
+        // jika diluar tgl mulai maka status aktivitas = 1
+        // jika diluar tgl selesai maka status aktivitas = 3
+
 
         // Jika ada file foto aktivitas baru, simpan dan hapus yang lama
         if ($request->hasFile('foto_aktivitas')) {
-            // Hapus foto lama jika ada
             if ($aktivitas->foto_aktivitas) {
                 FileUploadHelper::deletePhoto($aktivitas->foto_aktivitas);
             }

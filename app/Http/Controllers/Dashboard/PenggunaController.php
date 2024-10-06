@@ -68,6 +68,7 @@ class PenggunaController extends Controller
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Data pengguna tidak ditemukan.',
+                'data' => []
             ], Response::HTTP_OK);
         }
 
