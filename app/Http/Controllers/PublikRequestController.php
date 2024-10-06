@@ -462,6 +462,7 @@ class PublikRequestController extends Controller
                     'created_at' => $aktivitas->kelurahans->created_at,
                     'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
+                'potensi_suara' => $aktivitas->potensi_suara,
                 'created_at' => $aktivitas->created_at,
                 'updated_at' => $aktivitas->updated_at,
             ];

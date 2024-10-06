@@ -147,7 +147,7 @@ class AktivitasController extends Controller
                         ] : null,
                         'status_aktif' => $pelaksana->status_aktif,
                         'kelurahan' => $kelurahanData,
-                        'rw_pelaksana' => $aktivitas->pelaksana_users->rw_pelaksana ?? null,
+                        'rw_pelaksana' => $pelaksana->rw_pelaksana ?? null,
                         'pj_pelaksana' => $pjPelaksanaData,
                         'created_at' => $aktivitas->pelaksana_users->created_at,
                         'updated_at' => $aktivitas->pelaksana_users->updated_at
@@ -169,6 +169,7 @@ class AktivitasController extends Controller
                         'created_at' => $aktivitas->kelurahans->created_at,
                         'updated_at' => $aktivitas->kelurahans->updated_at
                     ] : null,
+                    'potensi_suara' => $aktivitas->potensi_suara,
                     'created_at' => $aktivitas->created_at,
                     'updated_at' => $aktivitas->updated_at,
                 ];
@@ -189,47 +190,40 @@ class AktivitasController extends Controller
         }
     }
 
+    // lanjot ini
     public function store(StoreAktivitasPelaksanaRequest $request)
     {
-        try {
-            if (!Gate::allows('create aktivitas')) {
-                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
-            }
-
-            $validatedData = $request->validated();
-
-            // Handle file upload untuk foto aktivitas
-            $fotoAktivitasPath = null;
-            if ($request->hasFile('foto_aktivitas')) {
-                $fotoAktivitasPath = FileUploadHelper::storePhoto($request->file('foto_aktivitas'), 'aktivitas');
-            }
-
-            // Simpan data aktivitas
-            $aktivitas = AktivitasPelaksana::create([
-                'pelaksana' => $validatedData['pelaksana_id'],
-                'status_aktivitas' => 1,
-                'deskripsi' => $validatedData['deskripsi'] ?? null,
-                'tgl_mulai' => $validatedData['tgl_mulai'],
-                'tgl_selesai' => $validatedData['tgl_selesai'],
-                'tempat_aktivitas' => $validatedData['tempat_aktivitas'],
-                'foto_aktivitas' => $fotoAktivitasPath,
-                'rw' => $validatedData['rw'],
-                'kelurahan' => $validatedData['kelurahan_id'],
-            ]);
-
-            $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
-            return response()->json([
-                'status' => Response::HTTP_CREATED,
-                'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil ditambahkan.",
-                'data' => $aktivitas
-            ], Response::HTTP_CREATED);
-        } catch (\Exception $e) {
-            Log::error('| Aktivitas | - Error function store: ' . $e->getMessage());
-            return response()->json([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        if (!Gate::allows('create aktivitas')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
+
+        $validatedData = $request->validated();
+
+        // Handle file upload untuk foto aktivitas
+        $fotoAktivitasPath = null;
+        if ($request->hasFile('foto_aktivitas')) {
+            $fotoAktivitasPath = FileUploadHelper::storePhoto($request->file('foto_aktivitas'), 'aktivitas');
+        }
+
+        // Simpan data aktivitas
+        $aktivitas = AktivitasPelaksana::create([
+            'pelaksana' => $validatedData['pelaksana_id'],
+            'status_aktivitas' => 1,
+            'deskripsi' => $validatedData['deskripsi'] ?? null,
+            'tgl_mulai' => $validatedData['tgl_mulai'],
+            'tgl_selesai' => $validatedData['tgl_selesai'],
+            'tempat_aktivitas' => $validatedData['tempat_aktivitas'],
+            'foto_aktivitas' => $fotoAktivitasPath,
+            'rw' => $validatedData['rw'],
+            'potensi_suara' => $validatedData['potensi_suara'],
+            'kelurahan' => $validatedData['kelurahan_id'],
+        ]);
+
+        $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
+        return response()->json([
+            'status' => Response::HTTP_CREATED,
+            'message' => "Aktivitas pada RW {$aktivitas->rw} Kelurahan '{$aktivitas->kelurahans->nama_kelurahan}' tanggal {$tanggal_aktivitas} berhasil ditambahkan.",
+        ], Response::HTTP_CREATED);
     }
 
     public function show($id)
@@ -282,6 +276,7 @@ class AktivitasController extends Controller
                     'created_at' => $aktivitas->kelurahans->created_at,
                     'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
+                'potensi_suara' => $aktivitas->potensi_suara,
                 'created_at' => $aktivitas->created_at,
                 'updated_at' => $aktivitas->updated_at,
             ];

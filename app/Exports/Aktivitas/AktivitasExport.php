@@ -30,6 +30,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             'kecamatan',
             'pelaksana',
             'status_aktivitas',
+            'potensi_suara',
             'terakhir_dibuat',
             'terakhir_diperbarui'
         ];
@@ -50,6 +51,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             $aktivitas->kelurahans->kecamatans ? $aktivitas->kelurahans->kecamatans->nama_kecamatan : 'N/A',
             $aktivitas->pelaksana_users ? $aktivitas->pelaksana_users->nama : 'N/A',
             $aktivitas->status ? $aktivitas->status->label : 'N/A',
+            $aktivitas->potensi_suara,
             $aktivitas->created_at,
             $aktivitas->updated_at
         ];
