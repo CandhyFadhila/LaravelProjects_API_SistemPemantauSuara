@@ -118,137 +118,134 @@ class DetailMapController extends Controller
 
     public function indexSuaraKPU(Request $request)
     {
-        try {
-            if (!Gate::allows('view suaraKPU')) {
-                return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
-            }
-
-            $kode_kelurahan = $request->input('kode_kelurahan', []);
-            $tahun = $request->input('tahun', []);
-
-            if (empty($kode_kelurahan) || empty($tahun)) {
-                return response()->json([
-                    'status' => Response::HTTP_BAD_REQUEST,
-                    'message' => 'Kode kelurahan dan tahun diperlukan.',
-                    'data' => null
-                ], Response::HTTP_OK);
-            }
-
-            // Step 1: Cari kelurahan berdasarkan array kode_kelurahan
-            $kelurahanIds = Kelurahan::whereIn('kode_kelurahan', $kode_kelurahan)->pluck('id');
-            if ($kelurahanIds->isEmpty()) {
-                return response()->json([
-                    'status' => Response::HTTP_NOT_FOUND,
-                    'message' => 'Data kelurahan tidak ditemukan.',
-                    'data' => null
-                ], Response::HTTP_OK);
-            }
-
-            // Step 2: Cari data suara KPU berdasarkan id kelurahan dan filter tahun
-            $suaraKPU = SuaraKPU::whereIn('kelurahan_id', $kelurahanIds)
-                ->where(function ($query) use ($tahun) {
-                    foreach ($tahun as $year) {
-                        $query->orWhere('tahun', $year);
-                    }
-                })
-                ->get();
-            if ($suaraKPU->isEmpty()) {
-                return response()->json([
-                    'status' => Response::HTTP_NOT_FOUND,
-                    'message' => 'Data suara KPU tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
-                    'data' => null
-                ], Response::HTTP_OK);
-            }
-
-            $upcomingTPS = UpcomingTps::whereIn('kelurahan_id', $kelurahanIds)
-                ->whereIn('tahun', $tahun)
-                ->get();
-            if ($upcomingTPS->isEmpty()) {
-                return response()->json([
-                    'status' => Response::HTTP_NOT_FOUND,
-                    'message' => 'Data TPS mendatang tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
-                    'data' => null
-                ], Response::HTTP_OK);
-            }
-
-            $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
-            $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
-            $format_suaraKPU = $groupedByPartai->map(function ($items, $partaiId) {
-                $partai = $items->first()->partais;
-
-                $tpsData = $items->map(function ($item) {
-                    return [
-                        'tps' => $item->tps,
-                        'jumlah_suara' => $item->jumlah_suara,
-                        'suara_caleg' => $item->suara_caleg ?? 'N/A',
-                        'suara_partai' => $item->suara_partai ?? 'N/A',
-                        'dpt_laki' => $item->dpt_laki,
-                        'dpt_perempuan' => $item->dpt_perempuan,
-                        'jumlah_dpt' => $item->jumlah_dpt
-                    ];
-                });
-
-                return [
-                    'partai' => [
-                        'id' => $partai->id,
-                        'nama' => $partai->nama,
-                        'color' => $partai->color ?? null
-                    ],
-                    'tps' => $tpsData
-                ];
-            })->values();
-
-            $format_chart = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id')->map(function ($items) {
-                $partai = $items->first()->partais;
-                $totalSuara = $items->first()->jumlah_suara;
-
-                return [
-                    'partai' => [
-                        'id' => $partai->id,
-                        'nama' => $partai->nama,
-                        'color' => $partai->color ?? null
-                    ],
-                    'jumlah_suara' => $totalSuara
-                ];
-            })->values();
-
-            $format_tps_mendatang = $upcomingTPS->map(function ($item) {
-                return [
-                    'kelurahan' => $item->kelurahans ? [
-                        'id' => $item->kelurahans->id,
-                        'nama_kelurahan' => $item->kelurahans->nama_kelurahan,
-                        'kode_kelurahan' => $item->kelurahans->kode_kelurahan,
-                        'max_rw' => $item->kelurahans->max_rw,
-                        'kecamatan' => $item->kelurahans->kecamatans,
-                        'kabupaten' => $item->kelurahans->kabupaten_kotas,
-                        'provinsi' => $item->kelurahans->provinsis,
-                        'created_at' => $item->kelurahans->created_at,
-                        'updated_at' => $item->kelurahans->updated_at
-                    ] : null,
-                    'tahun' => $item->tahun,
-                    'jumlah_tps' => $item->jumlah_tps,
-                    'created_at' => $item->created_at,
-                    'updated_at' => $item->updated_at
-                ];
-            })->values();
-
-            // Kembalikan data dalam bentuk response JSON
-            return response()->json([
-                'status' => Response::HTTP_OK,
-                'message' => 'Data suara KPU berhasil ditampilkan.',
-                'data' => [
-                    'chart' => $format_chart,
-                    'table' => $format_suaraKPU,
-                    'upcomingTPS' => $format_tps_mendatang,
-                    'total' => $tahun
-                ],
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            Log::error('| Detail Map | - Error function indexSuaraKPU: ' . $e->getMessage());
-            return response()->json([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // try {
+        if (!Gate::allows('view suaraKPU')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
+
+        $kode_kelurahan = $request->input('kode_kelurahan', []);
+        $tahun = $request->input('tahun', []);
+
+        if (empty($kode_kelurahan) || empty($tahun)) {
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => 'Kode kelurahan dan tahun diperlukan.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        // Step 1: Cari kelurahan berdasarkan array kode_kelurahan
+        $kelurahanIds = Kelurahan::whereIn('kode_kelurahan', $kode_kelurahan)->pluck('id');
+        if ($kelurahanIds->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data kelurahan tidak ditemukan.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        // Step 2: Cari data suara KPU berdasarkan id kelurahan dan filter tahun
+        $suaraKPU = SuaraKPU::whereIn('kelurahan_id', $kelurahanIds)
+            ->where(function ($query) use ($tahun) {
+                foreach ($tahun as $year) {
+                    $query->orWhere('tahun', $year);
+                }
+            })
+            ->get();
+        if ($suaraKPU->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data suara KPU tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        $upcomingTPS = UpcomingTps::whereIn('kelurahan_id', $kelurahanIds)
+            ->whereIn('tahun', $tahun)
+            ->first();
+        if (!$upcomingTPS) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data TPS mendatang tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
+        $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
+        $format_suaraKPU = $groupedByPartai->map(function ($items, $partaiId) {
+            $partai = $items->first()->partais;
+
+            $tpsData = $items->map(function ($item) {
+                return [
+                    'tps' => $item->tps,
+                    'jumlah_suara' => $item->jumlah_suara,
+                    'suara_caleg' => $item->suara_caleg ?? 'N/A',
+                    'suara_partai' => $item->suara_partai ?? 'N/A',
+                    'dpt_laki' => $item->dpt_laki,
+                    'dpt_perempuan' => $item->dpt_perempuan,
+                    'jumlah_dpt' => $item->jumlah_dpt
+                ];
+            });
+
+            return [
+                'partai' => [
+                    'id' => $partai->id,
+                    'nama' => $partai->nama,
+                    'color' => $partai->color ?? null
+                ],
+                'tps' => $tpsData
+            ];
+        })->values();
+
+        $format_chart = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id')->map(function ($items) {
+            $partai = $items->first()->partais;
+            $totalSuara = $items->first()->jumlah_suara;
+
+            return [
+                'partai' => [
+                    'id' => $partai->id,
+                    'nama' => $partai->nama,
+                    'color' => $partai->color ?? null
+                ],
+                'jumlah_suara' => $totalSuara
+            ];
+        })->values();
+
+        $format_tps_mendatang = [
+            'kelurahan' => $upcomingTPS->kelurahans ? [
+                'id' => $upcomingTPS->kelurahans->id,
+                'nama_kelurahan' => $upcomingTPS->kelurahans->nama_kelurahan,
+                'kode_kelurahan' => $upcomingTPS->kelurahans->kode_kelurahan,
+                'max_rw' => $upcomingTPS->kelurahans->max_rw,
+                'kecamatan' => $upcomingTPS->kelurahans->kecamatans,
+                'kabupaten' => $upcomingTPS->kelurahans->kabupaten_kotas,
+                'provinsi' => $upcomingTPS->kelurahans->provinsis,
+                'created_at' => $upcomingTPS->kelurahans->created_at,
+                'updated_at' => $upcomingTPS->kelurahans->updated_at
+            ] : null,
+            'tahun' => $upcomingTPS->tahun,
+            'jumlah_tps' => $upcomingTPS->jumlah_tps,
+            'created_at' => $upcomingTPS->created_at,
+            'updated_at' => $upcomingTPS->updated_at
+        ];
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Data suara KPU berhasil ditampilkan.',
+            'data' => [
+                'chart' => $format_chart,
+                'table' => $format_suaraKPU,
+                'upcomingTPS' => $format_tps_mendatang,
+                'total' => $tahun
+            ],
+        ], Response::HTTP_OK);
+        // } catch (\Exception $e) {
+        //     Log::error('| Detail Map | - Error function indexSuaraKPU: ' . $e->getMessage());
+        //     return response()->json([
+        //         'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+        //         'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
+        //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 }

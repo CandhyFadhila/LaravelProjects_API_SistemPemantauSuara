@@ -56,15 +56,6 @@ class AktivitasPelaksanaSeeder extends Seeder
                     'created_at' => Carbon::now('Asia/Jakarta'),
                     'updated_at' => Carbon::now('Asia/Jakarta'),
                 ]);
-
-                // Isi tabel upcoming_tps
-                DB::table('upcoming_tps')->insert([
-                    'kelurahan_id' => $kelurahan->id,
-                    'tahun' => 2024,
-                    'jumlah_tps' => rand(1, 25),
-                    'created_at' => Carbon::now('Asia/Jakarta'),
-                    'updated_at' => Carbon::now('Asia/Jakarta'),
-                ]);
             }
         }
     }
