@@ -398,7 +398,7 @@ class AktivitasController extends Controller
             }
             $aktivitas->foto_aktivitas = FileUploadHelper::storePhoto($request->file('foto_aktivitas'), 'aktivitas');
         } else if (is_string($request->input('foto_aktivitas'))) {
-            unset($data['foto_aktivitas']);
+            unset($validatedData['foto_aktivitas']);
         }
 
         $aktivitas->save();
