@@ -171,38 +171,30 @@ class DetailMapController extends Controller
                 ], Response::HTTP_OK);
             }
 
-            // Step 3: Format data suara KPU untuk tabel
-            $format_suaraKPU = $suaraKPU->map(function ($item) {
+            $groupedByPartai = $suaraKPU->groupBy('partai_id');  // Mengelompokkan berdasarkan partai_id
+
+            $format_suaraKPU = $groupedByPartai->map(function ($items, $partaiId) {
+                $partai = $items->first()->partais;
+
+                $tpsData = $items->map(function ($item) {
+                    return [
+                        'tps' => $item->tps,
+                        'jumlah_suara' => $item->jumlah_suara,
+                        'suara_caleg' => $item->suara_caleg ?? 'N/A',
+                        'suara_partai' => $item->suara_partai ?? 'N/A',
+                        'dpt_laki' => $item->dpt_laki,
+                        'dpt_perempuan' => $item->dpt_perempuan,
+                        'jumlah_dpt' => $item->jumlah_dpt
+                    ];
+                });
+
                 return [
-                    'id' => $item->id,
-                    'partai' => $item->partais ? [
-                        'id' => $item->partais->id,
-                        'nama' => $item->partais->nama,
-                        'color' => $item->partais->color ?? null
-                    ] : null,
-                    'kelurahan' => $item->kelurahans ? [
-                        'id' => $item->kelurahans->id,
-                        'nama_kelurahan' => $item->kelurahans->nama_kelurahan,
-                        'kode_kelurahan' => $item->kelurahans->kode_kelurahan,
-                        'max_rw' => $item->kelurahans->max_rw,
-                        'kecamatan' => $item->kelurahans->kecamatans,
-                        'kabupaten' => $item->kelurahans->kabupaten_kotas,
-                        'provinsi' => $item->kelurahans->provinsis,
-                        'created_at' => $item->kelurahans->created_at,
-                        'updated_at' => $item->kelurahans->updated_at
-                    ] : null,
-                    'tahun' => $item->tahun,
-                    'cakupan_wilayah' => $item->cakupan_wilayah,
-                    'kategori_suara' => $item->kategori_suaras,
-                    'tps' => $item->tps,
-                    'jumlah_suara' => $item->jumlah_suara,
-                    'dpt_laki' => $item->dpt_laki,
-                    'dpt_perempuan' => $item->dpt_perempuan,
-                    'jumlah_dpt' => $item->jumlah_dpt,
-                    'suara_caleg' => $item->suara_caleg ?? 'N/A',
-                    'suara_partai' => $item->suara_partai ?? 'N/A',
-                    'created_at' => $item->created_at,
-                    'updated_at' => $item->updated_at,
+                    'partai' => [
+                        'id' => $partai->id,
+                        'nama' => $partai->nama,
+                        'color' => $partai->color ?? null
+                    ],
+                    'tps' => $tpsData
                 ];
             })->values();
 

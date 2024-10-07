@@ -30,7 +30,7 @@ class AktivitasPelaksanaSeeder extends Seeder
             $bulan = rand(1, Carbon::now('Asia/Jakarta')->month - 1);
             $tahun = Carbon::now('Asia/Jakarta')->year;
 
-            $jumlahAktivitas = rand(10, 30);
+            $jumlahAktivitas = rand(5, 10);
 
             for ($i = 0; $i < $jumlahAktivitas; $i++) {
                 // Ambil status aktivitas dan kelurahan secara acak
