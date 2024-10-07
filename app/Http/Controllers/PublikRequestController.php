@@ -327,6 +327,10 @@ class PublikRequestController extends Controller
 
     public function getProfileUser($userId)
     {
+        if (!Gate::allows('view publikRequest')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        }
+
         $users = User::where('id', $userId)->where('id', '!=', 1)->get();
         if ($users->isEmpty()) {
             return response()->json([
