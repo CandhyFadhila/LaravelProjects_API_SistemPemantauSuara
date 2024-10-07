@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         $kelurahanIds = Kelurahan::pluck('id')->toArray();
 
         // Pertama, buat pengguna dengan role_id = 2 (Penanggung Jawab)
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $penanggungJawab = User::create([
                 'nama' => $faker->name,
                 'username' => $faker->unique()->userName,
@@ -43,7 +43,7 @@ class UserSeeder extends Seeder
         $penanggungJawabUsers = User::where('role_id', 2)->get(['id', 'kelurahan_id'])->toArray();
 
         // Kemudian, buat pengguna dengan role_id = 3 (Penggerak)
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= 70; $i++) {
             $jenisKelamin = $faker->randomElement([0, 1]); // 0 = perempuan, 1 = laki-laki
 
             // Tentukan Penanggung Jawab secara acak dari daftar Penanggung Jawab

@@ -17,7 +17,7 @@ class AktivitasPelaksanaSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::where('id', '!=', 1)->get();
+        $users = User::where('id', '!=', 1)->where('role_id', 3)->get();
         $statusAktivitas = StatusAktivitas::all();
         $kelurahans = Kelurahan::all();
 
@@ -26,37 +26,46 @@ class AktivitasPelaksanaSeeder extends Seeder
         }
 
         foreach ($users as $user) {
-            // Ambil status aktivitas dan kelurahan secara acak
-            $status = $statusAktivitas->random();
-            $kelurahan = $kelurahans->random();
+            // Tentukan bulan dan tahun yang sama (sebelum bulan saat ini, tahun ini)
+            $bulan = rand(1, Carbon::now('Asia/Jakarta')->month - 1);
+            $tahun = Carbon::now('Asia/Jakarta')->year;
 
-            // Buat tanggal mulai dan selesai aktivitas secara acak
-            $tglMulai = Carbon::now()->subDays(rand(1, 365))->format('Y-m-d');
-            $tglSelesai = Carbon::parse($tglMulai)->addDays(rand(1, 10))->format('Y-m-d');
+            $jumlahAktivitas = rand(10, 30);
 
-            // Isi tabel aktivitas_pelaksanas
-            DB::table('aktivitas_pelaksanas')->insert([
-                'pelaksana' => $user->id,
-                'status_aktivitas' => $status->id,
-                'deskripsi' => 'Deskripsi aktivitas oleh ' . $user->nama,
-                'tgl_mulai' => $tglMulai,
-                'tgl_selesai' => $tglSelesai,
-                'tempat_aktivitas' => 'Tempat aktivitas ' . $kelurahan->nama_kelurahan,
-                'foto_aktivitas' => 'default.jpg',
-                'rw' => rand(1, $kelurahan->max_rw),
-                'potensi_suara' => rand(100, 1000),
-                'kelurahan' => $kelurahan->id,
-                'created_at' => Carbon::now('Asia/Jakarta'),
-                'updated_at' => Carbon::now('Asia/Jakarta'),
-            ]);
+            for ($i = 0; $i < $jumlahAktivitas; $i++) {
+                // Ambil status aktivitas dan kelurahan secara acak
+                $status = $statusAktivitas->random();
+                $kelurahan = $kelurahans->random();
 
-            DB::table('upcoming_tps')->insert([
-                'kelurahan_id' => $kelurahan->id,
-                'tahun' => 2024,
-                'jumlah_tps' => rand(1, 25),
-                'created_at' => Carbon::now('Asia/Jakarta'),
-                'updated_at' => Carbon::now('Asia/Jakarta'),
-            ]);
+                // Buat tanggal mulai dan selesai aktivitas secara acak di bulan dan tahun yang sama
+                $tglMulai = Carbon::create($tahun, $bulan, rand(1, 28))->format('Y-m-d');
+                $tglSelesai = Carbon::parse($tglMulai)->addDays(rand(1, 5))->format('Y-m-d');
+
+                // Isi tabel aktivitas_pelaksanas
+                DB::table('aktivitas_pelaksanas')->insert([
+                    'pelaksana' => $user->id,
+                    'status_aktivitas' => $status->id,
+                    'deskripsi' => 'Deskripsi aktivitas oleh ' . $user->nama,
+                    'tgl_mulai' => $tglMulai,
+                    'tgl_selesai' => $tglSelesai,
+                    'tempat_aktivitas' => 'Tempat aktivitas ' . $kelurahan->nama_kelurahan,
+                    'foto_aktivitas' => 'default.jpg',
+                    'rw' => rand(1, $kelurahan->max_rw),
+                    'potensi_suara' => rand(100, 1000),
+                    'kelurahan' => $kelurahan->id,
+                    'created_at' => Carbon::now('Asia/Jakarta'),
+                    'updated_at' => Carbon::now('Asia/Jakarta'),
+                ]);
+
+                // Isi tabel upcoming_tps
+                DB::table('upcoming_tps')->insert([
+                    'kelurahan_id' => $kelurahan->id,
+                    'tahun' => 2024,
+                    'jumlah_tps' => rand(1, 25),
+                    'created_at' => Carbon::now('Asia/Jakarta'),
+                    'updated_at' => Carbon::now('Asia/Jakarta'),
+                ]);
+            }
         }
     }
 }
