@@ -247,9 +247,9 @@ class PenggunaController extends Controller
             }
         }
 
-        // if ($loggedInUser->role_id == 2 && $data['role_id'] == 3) {
-        //     $kelurahanIds = $loggedInUser->kelurahan_id;
-        // }
+        if ($loggedInUser->role_id == 2 && $data['role_id'] == 3) {
+            $kelurahanIds = $loggedInUser->kelurahan_id;
+        }
 
         $rwPelaksana = null;
         if ($loggedInUser->role_id == 2 && $data['role_id'] == 3) {
