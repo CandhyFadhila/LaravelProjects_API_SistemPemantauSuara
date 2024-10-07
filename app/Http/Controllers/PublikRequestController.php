@@ -530,7 +530,23 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $aktivitas = AktivitasPelaksana::orderBy('created_at', 'desc')->get();
+        $loggedInUser = auth()->user();
+
+        if ($loggedInUser->role_id == 1) {
+            $aktivitas = AktivitasPelaksana::orderBy('created_at', 'desc')->get();
+        } elseif ($loggedInUser->role_id == 2) {
+            $aktivitas = AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
+                $query->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+            })->orderBy('created_at', 'desc')->get();
+        } elseif ($loggedInUser->role_id == 3) {
+            $aktivitas = AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc')->get();
+        } else {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Anda tidak memiliki hak akses untuk melihat aktivitas ini.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         if ($aktivitas->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
