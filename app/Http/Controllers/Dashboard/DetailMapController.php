@@ -31,6 +31,7 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data kelurahan tidak ditemukan.',
+                    'data' => null
                 ], Response::HTTP_OK);
             }
 
@@ -46,6 +47,7 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data aktivitas tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                    'data' => null
                 ], Response::HTTP_OK);
             }
 
@@ -128,7 +130,8 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_BAD_REQUEST,
                     'message' => 'Kode kelurahan dan tahun diperlukan.',
-                ], Response::HTTP_BAD_REQUEST);
+                    'data' => null
+                ], Response::HTTP_OK);
             }
 
             // Step 1: Cari kelurahan berdasarkan array kode_kelurahan
@@ -137,6 +140,7 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data kelurahan tidak ditemukan.',
+                    'data' => null
                 ], Response::HTTP_OK);
             }
 
@@ -152,6 +156,7 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data suara KPU tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                    'data' => null
                 ], Response::HTTP_OK);
             }
 
@@ -162,6 +167,7 @@ class DetailMapController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_NOT_FOUND,
                     'message' => 'Data TPS mendatang tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
+                    'data' => null
                 ], Response::HTTP_OK);
             }
 
