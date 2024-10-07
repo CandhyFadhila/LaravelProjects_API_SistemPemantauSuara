@@ -325,6 +325,82 @@ class PublikRequestController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function getProfileUser($userId)
+    {
+        $users = User::where('id', $userId)->where('id', '!=', 1)->get();
+        if ($users->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data pengguna tidak ditemukan.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        $formattedData = $users->map(function ($user) {
+            $role = $user->roles->first();
+
+            $pjPelaksana = $user->pj_pelaksana ? User::find($user->pj_pelaksana) : null;
+            $pjPelaksanaData = $pjPelaksana ? [
+                'id' => $pjPelaksana->id,
+                'nama' => $pjPelaksana->nama,
+                'username' => $pjPelaksana->username,
+                'jenis_kelamin' => $pjPelaksana->jenis_kelamin,
+                'foto_profil' => $pjPelaksana->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $pjPelaksana->foto_profil : null,
+                'nik_ktp' => $pjPelaksana->nik_ktp,
+                'no_hp' => $pjPelaksana->no_hp,
+                'tgl_diangkat' => $pjPelaksana->tgl_diangkat,
+                'role' => $pjPelaksana->roles->first() ? [
+                    'id' => $pjPelaksana->roles->first()->id,
+                    'name' => $pjPelaksana->roles->first()->name,
+                    'deskripsi' => $pjPelaksana->roles->first()->deskripsi,
+                    'created_at' => $pjPelaksana->roles->first()->created_at,
+                    'updated_at' => $pjPelaksana->roles->first()->updated_at,
+                ] : null,
+                'status_aktif' => $pjPelaksana->status_users ? [
+                    'id' => $pjPelaksana->status_users->id,
+                    'label' => $pjPelaksana->status_users->label,
+                    'created_at' => $pjPelaksana->status_users->created_at,
+                    'updated_at' => $pjPelaksana->status_users->updated_at
+                ] : null,
+                'created_at' => $pjPelaksana->created_at,
+                'updated_at' => $pjPelaksana->updated_at
+            ] : null;
+
+            return [
+                'id' => $user->id,
+                'nama' => $user->nama,
+                'username' => $user->username,
+                'jenis_kelamin' => $user->jenis_kelamin,
+                'foto_profil' => $user->foto_profil ? env('STORAGE_SERVER_DOMAIN') . $user->foto_profil : null,
+                'nik_ktp' => $user->nik_ktp,
+                'no_hp' => $user->no_hp ?? null,
+                'tgl_diangkat' => $user->tgl_diangkat,
+                'role' => $role ? [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'deskripsi' => $role->deskripsi,
+                    'created_at' => $role->created_at,
+                    'updated_at' => $role->updated_at,
+                ] : null,
+                'pj_pelaksana' => $pjPelaksanaData,
+                'status_aktif' => $user->status_users ? [
+                    'id' => $user->status_users->id,
+                    'label' => $user->status_users->label,
+                    'created_at' => $user->status_users->created_at,
+                    'updated_at' => $user->status_users->updated_at
+                ] : null,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Retrieving all users',
+            'data' => $formattedData
+        ], Response::HTTP_OK);
+    }
+
     public function getAllDataKecamatan()
     {
         if (!Gate::allows('view publikRequest')) {
