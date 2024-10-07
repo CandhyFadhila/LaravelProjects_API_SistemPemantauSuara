@@ -31,7 +31,21 @@ class AktivitasController extends Controller
         }
 
         $limit = $request->input('limit', 10);
-        $aktivitas_pelaksana = AktivitasPelaksana::query()->orderBy('created_at', 'desc');
+        $loggedInUser = auth()->user();
+        if ($loggedInUser->role_id == 1) {
+            $aktivitas_pelaksana = AktivitasPelaksana::query()->orderBy('created_at', 'desc');
+        } elseif ($loggedInUser->role_id == 2) {
+            $aktivitas_pelaksana = AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
+                $query->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+            })->orderBy('created_at', 'desc');
+        } elseif ($loggedInUser->role_id == 3) {
+            $aktivitas_pelaksana = AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc');
+        } else {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Anda tidak memiliki hak akses untuk melihat aktivitas ini.'
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         $filters = $request->all();
         $aktivitas = AktivitasFilterHelper::applyFiltersAktivitas($aktivitas_pelaksana, $filters);
@@ -372,7 +386,6 @@ class AktivitasController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        // Validasi data yang diterima
         $validatedData = $request->validated();
 
         // Update data aktivitas
