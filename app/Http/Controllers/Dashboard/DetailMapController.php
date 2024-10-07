@@ -200,7 +200,7 @@ class DetailMapController extends Controller
 
             $format_chart = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id')->map(function ($items) {
                 $partai = $items->first()->partais;
-                $totalSuara = $items->sum('jumlah_suara');
+                $jumlah_suara = $items->first()->jumlah_suara;
 
                 return [
                     'partai' => [
@@ -208,7 +208,7 @@ class DetailMapController extends Controller
                         'nama' => $partai->nama,
                         'color' => $partai->color ?? null
                     ],
-                    'jumlah_suara' => $totalSuara
+                    'jumlah_suara' => $jumlah_suara,
                 ];
             })->values();
 
