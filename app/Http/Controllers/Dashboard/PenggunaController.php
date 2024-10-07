@@ -30,13 +30,26 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
+        $loggedInUser = auth()->user();
         $limit = $request->input('limit', 10);
-        // if ($loggedInUser->hasAnyRole(['Super Admin', 'Penanggung Jawab'])) {
-        //     $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
-        // } else {
-        //     $query = User::query()->where('status_aktif', 2)->where('id', '!=', 1)->orderBy('created_at', 'desc');
-        // }
-        $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+
+        if ($loggedInUser->role_id == 1) {
+            $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+        }
+        elseif ($loggedInUser->role_id == 2) {
+            $query = User::query()
+                ->where('role_id', 3)
+                ->where('status_aktif', 2)
+                ->where('pj_pelaksana', $loggedInUser->id)
+                ->orderBy('created_at', 'desc');
+        }
+        else {
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Anda tidak memiliki hak akses untuk melakukan proses ini.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
 
         $filters = $request->all();
         $query = UserFilterHelper::applyFiltersUser($query, $filters);

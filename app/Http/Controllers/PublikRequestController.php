@@ -55,14 +55,25 @@ class PublikRequestController extends Controller
 
         $loggedInUser = auth()->user();
 
-        if ($loggedInUser->nama !== 'Super Admin') {
+        // Super Admin (role_id = 1), mendapatkan semua pengguna
+        if ($loggedInUser->role_id == 1) {
             $users = User::orderBy('created_at', 'desc')
-                ->where('nama', '!=', 'Super Admin')
                 ->where('id', '!=', 1)
+                ->get();
+        }
+        // Penanggung Jawab (role_id = 2), hanya mendapatkan pengguna Penggerak (role_id = 3)
+        elseif ($loggedInUser->role_id == 2) {
+            $users = User::where('role_id', 3)
                 ->where('status_aktif', 2)
+                ->where('pj_pelaksana', $loggedInUser->id)
+                ->orderBy('created_at', 'desc')
                 ->get();
         } else {
-            $users = User::orderBy('created_at', 'desc')->where('status_aktif', 2)->get();
+            // Jika bukan Super Admin atau Penanggung Jawab
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Anda tidak memiliki hak akses untuk melakukan proses ini.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         if ($users->isEmpty()) {
@@ -174,12 +185,31 @@ class PublikRequestController extends Controller
 
     public function getAllUserbyPenggerak()
     {
-        $loggedInUser = Auth::user();
+        $loggedInUser = auth()->user();
         if (!in_array($loggedInUser->role_id, [1, 2])) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $users = User::where('role_id', 3)->orderBy('created_at', 'desc')->get();
+        // Super Admin (role_id = 1), mendapatkan semua pengguna
+        if ($loggedInUser->role_id == 1) {
+            $users = User::orderBy('created_at', 'desc')
+                ->where('id', '!=', 1)
+                ->get();
+        }
+        // Penanggung Jawab (role_id = 2), hanya mendapatkan pengguna Penggerak (role_id = 3)
+        elseif ($loggedInUser->role_id == 2) {
+            $users = User::where('role_id', 3)
+                ->where('status_aktif', 2)
+                ->where('pj_pelaksana', $loggedInUser->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Jika bukan Super Admin atau Penanggung Jawab
+            return response()->json([
+                'status' => Response::HTTP_FORBIDDEN,
+                'message' => 'Anda tidak memiliki hak akses untuk melakukan proses ini.',
+            ], Response::HTTP_FORBIDDEN);
+        }
         if ($users->isEmpty()) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,

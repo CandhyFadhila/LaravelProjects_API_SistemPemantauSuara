@@ -54,6 +54,7 @@ class SuaraKPUController extends Controller
             $file = $request->validated();
 
             try {
+                ini_set('max_execution_time', 500);
                 Excel::import(new SuaraKPUImport, $file['kpu_file']);
             } catch (\Exception $e) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Maaf sepertinya terjadi kesalahan.' . $e->getMessage()), Response::HTTP_NOT_ACCEPTABLE);

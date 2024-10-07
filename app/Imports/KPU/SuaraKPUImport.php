@@ -79,19 +79,19 @@ class SuaraKPUImport implements ToModel, WithHeadingRow
         if (!$kategori_suara) {
             throw new \Exception("Kategori '" . $row['kategori_suara'] . "' tidak ditemukan.");
         }
-        // throw new \Exception($row['total_dpt']);
-        for ($i=0; $i < 18; $i++) {
+
+        for ($i = 0; $i < 18; $i++) {
             $key = $i;
-            if($i < 18){
-                $key = $i+1;
-            }else {
+            if ($i < 18) {
+                $key = $i + 1;
+            } else {
                 $key = $i;
             }
-            $partai = $this->Partai->where('nama', $row['partai_'.$key])->first();
+            $partai = $this->Partai->where('nama', $row['partai_' . $key])->first();
             if (!$partai) {
-                throw new \Exception("Partai '" . $row['partai_'.$key] . "' tidak ditemukan.");
+                throw new \Exception("Partai '" . $row['partai_' . $key] . "' tidak ditemukan.");
             }
-            // $partai [] = $row['partai_' . $key];
+
             SuaraKPU::create([
                 'partai_id' => $partai->id,
                 'kelurahan_id' => $kelurahan->id,
@@ -107,24 +107,6 @@ class SuaraKPUImport implements ToModel, WithHeadingRow
                 'suara_caleg' => $row['suara_caleg_' . $key] ?? null,
                 'suara_partai' => $row['suara_partai_' . $key] ?? null,
             ]);
-            // return new SuaraKPU([
-            //     'partai_id' => $partai->id,
-            //     'kelurahan_id' => $kelurahan->id,
-            //     'tahun' => $row['tahun'],
-            //     'tps' => $row['tps'],
-            //     'kategori_suara_id' => $kategori_suara->id,
-            //     'cakupan_wilayah' => $row['cakupan_wilayah'],
-            //     'alamat' => $row['alamat'],
-            //     'jumlah_suara' => $row['total_suara_'.$key],
-            //     'dpt_laki' => $row['dpt_laki'],
-            //     'dpt_perempuan' => $row['dpt_perempuan'],
-            //     'jumlah_dpt' => $row['total_dpt'],
-            //     'suara_caleg' => $row['suara_caleg_'.$key] ?? null,
-            //     'suara_partai' => $row['suara_partai_'.$key] ?? null,
-            // ]);
         }
-        // $string = implode(', ', $partai);
-        // throw new \Exception($string);
-
     }
 }

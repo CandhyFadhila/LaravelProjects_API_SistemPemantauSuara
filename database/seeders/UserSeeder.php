@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\RandomHelper;
 use App\Models\User;
 use App\Models\Kelurahan;
 use Illuminate\Database\Seeder;
@@ -50,10 +51,12 @@ class UserSeeder extends Seeder
             $kelurahanId = $pjPelaksana['kelurahan_id']; // Kelurahan diambil dari Penanggung Jawab
 
             $rwPelaksana = $faker->randomElements(range(1, 10), rand(1, 3));
+            $namaFaker = $faker->name($jenisKelamin ? 'female' : 'male');
+            $username = RandomHelper::generateUsername($namaFaker);
 
             $user = User::create([
-                'nama' => $faker->name($jenisKelamin ? 'female' : 'male'),
-                'username' => $faker->unique()->userName,
+                'nama' => $namaFaker,
+                'username' => $username,
                 'nik_ktp' => $faker->unique()->numerify('###############'),
                 'foto_profil' => null,
                 'no_hp' => $faker->phoneNumber,
