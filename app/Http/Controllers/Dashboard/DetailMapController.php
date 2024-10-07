@@ -237,7 +237,7 @@ class DetailMapController extends Controller
                 'chart' => $format_chart,
                 'table' => $format_suaraKPU,
                 'upcomingTPS' => $format_tps_mendatang,
-                'total' => $tahun
+                'tahun' => $tahun
             ],
         ], Response::HTTP_OK);
         // } catch (\Exception $e) {
