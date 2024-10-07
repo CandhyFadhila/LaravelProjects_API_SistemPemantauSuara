@@ -13,17 +13,17 @@ class SuaraKPUSeeder extends Seeder
 {
     public function run(): void
     {
-        $kelurahanIds = Kelurahan::pluck('id')->take(10)->toArray();
+        $kelurahans = Kelurahan::select('id', 'jumlah_tps')->take(10)->get(); 
         $partaiIds = Partai::pluck('id')->toArray();
-
-        foreach ($kelurahanIds as $kelurahanId) {
-            foreach ($partaiIds as $partaiId) {
-                $totalTPS = rand(9, 12);
-
-                for ($tps = 1; $tps <= $totalTPS; $tps++) {
+    
+        foreach ($kelurahans as $kelurahan) {
+            $totalTPS = $kelurahan->jumlah_tps;
+    
+            for ($tps = 1; $tps <= $totalTPS; $tps++) {
+                foreach ($partaiIds as $partaiId) {
                     SuaraKPU::create([
                         'partai_id' => $partaiId,
-                        'kelurahan_id' => $kelurahanId,
+                        'kelurahan_id' => $kelurahan->id,
                         'tahun' => 2024,
                         'tps' => $tps,
                         'kategori_suara_id' => 2,
@@ -40,4 +40,5 @@ class SuaraKPUSeeder extends Seeder
             }
         }
     }
+    
 }

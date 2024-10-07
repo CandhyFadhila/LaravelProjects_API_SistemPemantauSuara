@@ -171,8 +171,8 @@ class DetailMapController extends Controller
                 ], Response::HTTP_OK);
             }
 
-            $groupedByPartai = $suaraKPU->groupBy('partai_id');  // Mengelompokkan berdasarkan partai_id
-
+            $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
+            $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
             $format_suaraKPU = $groupedByPartai->map(function ($items, $partaiId) {
                 $partai = $items->first()->partais;
 
@@ -198,14 +198,17 @@ class DetailMapController extends Controller
                 ];
             })->values();
 
-            $format_chart = $suaraKPU->map(function ($item) {
+            $format_chart = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id')->map(function ($items) {
+                $partai = $items->first()->partais;
+                $totalSuara = $items->sum('jumlah_suara');
+
                 return [
-                    'partai' => $item->partais ? [
-                        'id' => $item->partais->id,
-                        'nama' => $item->partais->nama,
-                        'color' => $item->partais->color ?? null
-                    ] : null,
-                    'jumlah_suara' => $item->jumlah_suara
+                    'partai' => [
+                        'id' => $partai->id,
+                        'nama' => $partai->nama,
+                        'color' => $partai->color ?? null
+                    ],
+                    'jumlah_suara' => $totalSuara
                 ];
             })->values();
 
