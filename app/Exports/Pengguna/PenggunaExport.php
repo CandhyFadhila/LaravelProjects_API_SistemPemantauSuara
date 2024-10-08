@@ -13,11 +13,28 @@ class PenggunaExport implements FromCollection, WithHeadings, WithMapping
 {
     use Exportable;
 
+    protected $User;
+
+    public function __construct($User)
+    {
+        $this->User = $User;
+    }
+
     public function collection()
     {
-        return User::with(['roles', 'status_users'])
-            ->where('id', '!=', 1)
-            ->get();
+        $query = User::with(['roles', 'status_users']);
+
+        if ($this->User->role_id == 1) {
+            return $query->where('id', '!=', 1)->get();
+        }
+        if ($this->User->role_id == 2) {
+            return $query->where(function ($q) {
+                $q->where('role_id', 3)->where('pj_pelaksana', $this->User->id)
+                    ->orWhere('id', $this->User->id);
+            })->get();
+        }
+
+        return collect();
     }
 
     public function headings(): array

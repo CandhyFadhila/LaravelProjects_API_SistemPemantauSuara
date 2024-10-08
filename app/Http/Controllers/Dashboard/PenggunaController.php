@@ -35,15 +35,13 @@ class PenggunaController extends Controller
 
         if ($loggedInUser->role_id == 1) {
             $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
-        }
-        elseif ($loggedInUser->role_id == 2) {
+        } elseif ($loggedInUser->role_id == 2) {
             $query = User::query()
                 ->where('role_id', 3)
                 ->where('status_aktif', 2)
                 ->where('pj_pelaksana', $loggedInUser->id)
                 ->orderBy('created_at', 'desc');
-        }
-        else {
+        } else {
             return response()->json([
                 'status' => Response::HTTP_FORBIDDEN,
                 'message' => 'Anda tidak memiliki hak akses untuk melakukan proses ini.',
@@ -529,7 +527,7 @@ class PenggunaController extends Controller
     }
 
     // Reset by admin
-    public function resetPasswordPengguna(Request $request, $id)
+    public function resetPasswordPengguna($id)
     {
         if (!Gate::allows('reset password')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
@@ -541,9 +539,9 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pengguna akun tidak ditemukan.'), Response::HTTP_NOT_FOUND);
         }
 
-        if ($user->status_aktif === 2) {
-            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Akun pengguna sedang bersatus aktif, Jika ingin mereset password silahkan nonaktifkan akun terlebih dahulu.'), Response::HTTP_FORBIDDEN);
-        }
+        // if ($user->status_aktif === 2) {
+        //     return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Akun pengguna sedang bersatus aktif, Jika ingin mereset password silahkan nonaktifkan akun terlebih dahulu.'), Response::HTTP_FORBIDDEN);
+        // }
 
         // 2. Pengecualian 'Super Admin'
         if ($user->id == 1 || $user->nama === 'Super Admin') {
@@ -551,9 +549,8 @@ class PenggunaController extends Controller
         }
 
         // 3. Reset password
-        $newPassword = $request->input('password');
-        $hashedPassword = Hash::make($newPassword);
-        $user->password = $hashedPassword;
+        $newPassword = RandomHelper::generatePasswordBasic();
+        $user->password = Hash::make($newPassword);
         $user->save();
 
         return response()->json([
@@ -584,7 +581,7 @@ class PenggunaController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berhasil memperbarui kata sandi anda.'), Response::HTTP_OK);
     }
 
-    public function exportPengguna(Request $request)
+    public function exportPengguna()
     {
         if (!Gate::allows('export pengguna')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);

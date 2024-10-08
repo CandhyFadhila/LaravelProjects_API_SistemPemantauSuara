@@ -42,6 +42,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'no',
+            'pelaksana',
             'deskripsi',
             'tanggal_mulai',
             'tanggal_selesai',
@@ -49,7 +50,6 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             'rw',
             'kelurahan',
             'kecamatan',
-            'pelaksana',
             'status_aktivitas',
             'potensi_suara',
             'terakhir_dibuat',
@@ -63,6 +63,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
 
         return [
             $no++,
+            $aktivitas->pelaksana_users ? $aktivitas->pelaksana_users->nama : 'N/A',
             $aktivitas->deskripsi ?? 'N/A',
             $aktivitas->tgl_mulai,
             $aktivitas->tgl_selesai,
@@ -70,9 +71,8 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             $aktivitas->rw,
             $aktivitas->kelurahans ? $aktivitas->kelurahans->nama_kelurahan : 'N/A',
             $aktivitas->kelurahans->kecamatans ? $aktivitas->kelurahans->kecamatans->nama_kecamatan : 'N/A',
-            $aktivitas->pelaksana_users ? $aktivitas->pelaksana_users->nama : 'N/A',
             $aktivitas->status ? $aktivitas->status->label : 'N/A',
-            $aktivitas->potensi_suara,
+            $aktivitas->potensi_suara ?? 'N/A',
             $aktivitas->created_at,
             $aktivitas->updated_at
         ];

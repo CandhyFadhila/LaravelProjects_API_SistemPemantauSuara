@@ -221,15 +221,15 @@ class AktivitasController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $existingAktivitas = AktivitasPelaksana::where('kelurahan', $kelurahan->id)
-            ->where('rw', $validatedData['rw'])
-            ->first();
-        if ($existingAktivitas) {
-            return response()->json([
-                'status' => Response::HTTP_BAD_REQUEST,
-                'message' => "Aktivitas pada RW {$validatedData['rw']} di kelurahan ini sudah ada. Mohon lakukan pembaruan (update) aktivitas."
-            ], Response::HTTP_BAD_REQUEST);
-        }
+        // $existingAktivitas = AktivitasPelaksana::where('kelurahan', $kelurahan->id)
+        //     ->where('rw', $validatedData['rw'])
+        //     ->first();
+        // if ($existingAktivitas) {
+        //     return response()->json([
+        //         'status' => Response::HTTP_BAD_REQUEST,
+        //         'message' => "Aktivitas pada RW {$validatedData['rw']} di kelurahan ini sudah ada. Mohon lakukan pembaruan (update) aktivitas."
+        //     ], Response::HTTP_BAD_REQUEST);
+        // }
 
         // Simpan data aktivitas
         $aktivitas = AktivitasPelaksana::create([
@@ -455,7 +455,7 @@ class AktivitasController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function exportAktivitas(Request $request)
+    public function exportAktivitas()
     {
         if (!Gate::allows('export aktivitas')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
@@ -474,7 +474,7 @@ class AktivitasController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Maaf sepertinya terjadi kesalahan.'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Data pengguna berhasil di download.'), Response::HTTP_OK);
+        return response()->json(new WithoutDataResource(Response::HTTP_NO_CONTENT, 'Data pengguna berhasil di download.'), Response::HTTP_NO_CONTENT);
     }
 
     public function importAktivitas(ImportAktivitasRequest $request)

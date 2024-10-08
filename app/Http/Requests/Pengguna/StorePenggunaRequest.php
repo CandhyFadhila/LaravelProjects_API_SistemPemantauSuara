@@ -34,6 +34,7 @@ class StorePenggunaRequest extends FormRequest
             'role_id' => 'required|integer',
             'kelurahan_id' => 'nullable',
             'rw_pelaksana' => 'nullable',
+            'password' => 'required',
         ];
     }
 
@@ -55,7 +56,8 @@ class StorePenggunaRequest extends FormRequest
             'foto_profil.mimes' => 'Tipe file foto yang diperbolehkan hanya jpg, jpeg, dan png.',
             'foto_profil.max' => 'Ukuran file foto yang diperbolehkan maksimal 5 MB.',
             'role_id.required' => 'Role pengguna tidak diperbolehkan kosong.',
-            'role_id.integer' => 'Role pengguna tidak diperbolehkan mengandung selain angka.'
+            'role_id.integer' => 'Role pengguna tidak diperbolehkan mengandung selain angka.',
+            'password.required' => 'Password pengguna tidak diperbolehkan kosong.',
         ];
     }
 
