@@ -173,6 +173,7 @@ class AktivitasController extends Controller
                 'tgl_selesai' => $aktivitas->tgl_selesai,
                 'tempat_aktivitas' => $aktivitas->tempat_aktivitas,
                 'foto_aktivitas' => $aktivitas->foto_aktivitas ? env('STORAGE_SERVER_DOMAIN') . $aktivitas->foto_aktivitas : null,
+                'rw' => $aktivitas->rw,
                 'kelurahan' => $aktivitas->kelurahans ? [
                     'id' => $aktivitas->kelurahans->id,
                     'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
@@ -217,6 +218,16 @@ class AktivitasController extends Controller
             return response()->json([
                 'status' => Response::HTTP_BAD_REQUEST,
                 'message' => "Kelurahan dengan kode '{$validatedData['kelurahan_id']}' tidak ditemukan."
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $existingAktivitas = AktivitasPelaksana::where('kelurahan', $kelurahan->id)
+            ->where('rw', $validatedData['rw'])
+            ->first();
+        if ($existingAktivitas) {
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => "Aktivitas pada RW {$validatedData['rw']} di kelurahan ini sudah ada. Mohon lakukan pembaruan (update) aktivitas."
             ], Response::HTTP_BAD_REQUEST);
         }
 

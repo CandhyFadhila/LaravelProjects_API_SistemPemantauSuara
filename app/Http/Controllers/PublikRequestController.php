@@ -192,8 +192,8 @@ class PublikRequestController extends Controller
 
         // Super Admin (role_id = 1), mendapatkan semua pengguna
         if ($loggedInUser->role_id == 1) {
-            $users = User::orderBy('created_at', 'desc')
-                ->where('id', '!=', 1)
+            $users = User::where('role_id', 3)
+                ->orderBy('created_at', 'desc')
                 ->get();
         }
         // Penanggung Jawab (role_id = 2), hanya mendapatkan pengguna Penggerak (role_id = 3)
@@ -214,14 +214,6 @@ class PublikRequestController extends Controller
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
                 'message' => 'Pengguna dengan role Penggerak tidak ditemukan.',
-                'data' => []
-            ], Response::HTTP_OK);
-        }
-
-        if ($users->isEmpty()) {
-            return response()->json([
-                'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data pengguna tidak ditemukan.',
                 'data' => []
             ], Response::HTTP_OK);
         }
