@@ -2,6 +2,7 @@
 
 namespace App\Exports\Aktivitas;
 
+use App\Models\User;
 use App\Models\AktivitasPelaksana;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -24,15 +25,16 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
         $query = AktivitasPelaksana::with(['pelaksana_users', 'status', 'kelurahans']);
 
         if ($this->User->role_id == 1) {
-            return $query->get();
+            return $query->orderBy('tgl_mulai', 'asc')->get();
         }
         if ($this->User->role_id == 2) {
             return $query->whereHas('pelaksana_users', function ($q) {
                 $q->where('role_id', 3)->where('pj_pelaksana', $this->User->id);
-            })->get();
+            })->orderBy('tgl_mulai', 'asc')->get();
         }
         if ($this->User->role_id == 3) {
-            return $query->where('pelaksana', $this->User->id)->get();
+            return $query->where('pelaksana', $this->User->id)
+                ->orderBy('tgl_mulai', 'asc')->get();
         }
 
         return collect();
@@ -43,14 +45,15 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
         return [
             'no',
             'pelaksana',
-            'deskripsi',
+            'penanggung_jawab',
+            'deskripsi_aktivitas',
             'tanggal_mulai',
             'tanggal_selesai',
             'tempat_aktivitas',
             'rw',
             'kelurahan',
             'kecamatan',
-            'status_aktivitas',
+            // 'status_aktivitas',
             'potensi_suara',
             'terakhir_dibuat',
             'terakhir_diperbarui'
@@ -61,9 +64,15 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
     {
         static $no = 1;
 
+        $pjPelaksana = $aktivitas->pelaksana_users && $aktivitas->pelaksana_users->pj_pelaksana
+            ? User::find($aktivitas->pelaksana_users->pj_pelaksana)
+            : null;
+        $pjPelaksanaNama = $pjPelaksana ? $pjPelaksana->nama : 'N/A';
+
         return [
             $no++,
             $aktivitas->pelaksana_users ? $aktivitas->pelaksana_users->nama : 'N/A',
+            $pjPelaksanaNama,
             $aktivitas->deskripsi ?? 'N/A',
             $aktivitas->tgl_mulai,
             $aktivitas->tgl_selesai,
@@ -71,7 +80,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             $aktivitas->rw,
             $aktivitas->kelurahans ? $aktivitas->kelurahans->nama_kelurahan : 'N/A',
             $aktivitas->kelurahans->kecamatans ? $aktivitas->kelurahans->kecamatans->nama_kecamatan : 'N/A',
-            $aktivitas->status ? $aktivitas->status->label : 'N/A',
+            // $aktivitas->status ? $aktivitas->status->label : 'N/A',
             $aktivitas->potensi_suara ?? 'N/A',
             $aktivitas->created_at,
             $aktivitas->updated_at
