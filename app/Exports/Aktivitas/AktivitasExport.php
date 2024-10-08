@@ -12,9 +12,30 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
 {
     use Exportable;
 
+    protected $User;
+
+    public function __construct($User)
+    {
+        $this->User = $User;
+    }
+
     public function collection()
     {
-        return AktivitasPelaksana::with(['pelaksana_users', 'status', 'kelurahans'])->get();
+        $query = AktivitasPelaksana::with(['pelaksana_users', 'status', 'kelurahans']);
+
+        if ($this->User->role_id == 1) {
+            return $query->get();
+        }
+        if ($this->User->role_id == 2) {
+            return $query->whereHas('pelaksana_users', function ($q) {
+                $q->where('role_id', 3)->where('pj_pelaksana', $this->User->id);
+            })->get();
+        }
+        if ($this->User->role_id == 3) {
+            return $query->where('pelaksana', $this->User->id)->get();
+        }
+
+        return collect();
     }
 
     public function headings(): array

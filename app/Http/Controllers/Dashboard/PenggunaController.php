@@ -590,13 +590,15 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
+        $loggedInUser = auth()->user();
+
         $data_pengguna = User::all();
         if ($data_pengguna->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data pengguna yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
         }
 
         try {
-            return Excel::download(new PenggunaExport($request->all()), 'data-pengguna.xls');
+            return Excel::download(new PenggunaExport($loggedInUser), 'data-pengguna.xls');
         } catch (\Throwable $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Maaf sepertinya terjadi kesalahan.'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }

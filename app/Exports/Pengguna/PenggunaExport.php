@@ -16,7 +16,6 @@ class PenggunaExport implements FromCollection, WithHeadings, WithMapping
     public function collection()
     {
         return User::with(['roles', 'status_users'])
-            // ->where('status_aktif', 2)
             ->where('id', '!=', 1)
             ->get();
     }

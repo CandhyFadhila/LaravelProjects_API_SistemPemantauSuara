@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('username')->unique();
-            $table->string('nik_ktp', 16); // wajib
+            $table->string('nik_ktp', 16);
             $table->string('foto_profil')->nullable();
-            $table->string('no_hp', 50); // wajib
+            $table->string('no_hp', 50);
             $table->string('tgl_diangkat')->nullable();
             $table->boolean('jenis_kelamin'); // 1 = laki-laki, 0 = perempuan
             $table->foreignId('role_id')->nullable();

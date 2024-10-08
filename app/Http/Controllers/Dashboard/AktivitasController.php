@@ -461,13 +461,15 @@ class AktivitasController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
+        $loggedInUser = auth()->user();
+
         $data_aktivitas = AktivitasPelaksana::all();
         if ($data_aktivitas->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada data aktivitas yang tersedia untuk diekspor.'), Response::HTTP_NOT_FOUND);
         }
 
         try {
-            return Excel::download(new AktivitasExport($request->all()), 'data-aktivitas.xls');
+            return Excel::download(new AktivitasExport($loggedInUser), 'data-aktivitas.xls');
         } catch (\Throwable $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Maaf sepertinya terjadi kesalahan.'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
