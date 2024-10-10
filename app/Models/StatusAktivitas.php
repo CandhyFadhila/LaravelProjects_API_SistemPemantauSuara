@@ -21,4 +21,14 @@ class StatusAktivitas extends Model
     {
         return $this->hasMany(AktivitasPelaksana::class, 'status_aktivitas', 'id');
     }
+
+    /**
+     * Get all of the status_aktivitas_rw for the StatusAktivitas
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function status_aktivitas_rw(): HasMany
+    {
+        return $this->hasMany(StatusAktivitasRw::class, 'status_aktivitas', 'id');
+    }
 }

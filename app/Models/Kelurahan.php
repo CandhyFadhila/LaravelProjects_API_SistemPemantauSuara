@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,5 +79,15 @@ class Kelurahan extends Model
     public function potensi_tps(): HasMany
     {
         return $this->hasMany(UpcomingTps::class, 'kelurahan_id', 'id');
+    }
+
+    /**
+     * Get the status_aktivitas_rw associated with the Kelurahan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function status_aktivitas_rw(): HasOne
+    {
+        return $this->hasOne(StatusAktivitasRw::class, 'kelurahan_id', 'id');
     }
 }

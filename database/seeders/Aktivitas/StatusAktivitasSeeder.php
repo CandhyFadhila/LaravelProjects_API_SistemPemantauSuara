@@ -14,7 +14,8 @@ class StatusAktivitasSeeder extends Seeder
      */
     public function run(): void
     {
-        $status = ['Belum Dilaksanakan', 'Sedang Dilaksanakan', 'Sudah Dilaksanakan'];
+        // $status = ['Belum Dilaksanakan', 'Sedang Dilaksanakan', 'Sudah Dilaksanakan'];
+        $status = ['Alat Peraga', 'Sosialisasi'];
         foreach ($status as $status) {
             DB::table('status_aktivitas')->insert([
                 'label' => $status,

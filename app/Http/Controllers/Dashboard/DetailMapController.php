@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\public\WithoutDataResource;
+use App\Models\StatusAktivitasRw;
 use App\Models\UpcomingTps;
 
 class DetailMapController extends Controller
@@ -171,6 +172,27 @@ class DetailMapController extends Controller
                 ], Response::HTTP_OK);
             }
 
+            $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
+            $list_rw = [];
+            foreach ($kelurahanIds as $kelurahanId) {
+                $kelurahan = Kelurahan::find($kelurahanId);
+                if ($kelurahan) {
+                    $maxRw = $kelurahan->max_rw; // Dapatkan max_rw dari kelurahan
+                    $rwList = array_fill(0, $maxRw, null); // Inisialisasi list dengan null
+
+                    // Cek status untuk setiap RW
+                    foreach ($statusAktivitasRw as $status) {
+                        if ($status->kelurahan_id == $kelurahanId && $status->rw <= $maxRw) {
+                            $rwList[$status->rw - 1] = $status->status_aktivitas; // Tampilkan status_aktivitas untuk RW yang sesuai
+                        }
+                    }
+
+                    // Gabungkan hasil ke array $list_rw,
+                    $list_rw = array_merge($list_rw, $rwList); // Gabungkan array RW ke $list_rw
+                }
+            }
+
+
             $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
             $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
             $format_suaraKPU = $groupedByPartai->map(function ($items, $partaiId) {
@@ -237,6 +259,7 @@ class DetailMapController extends Controller
                     'chart' => $format_chart,
                     'table' => $format_suaraKPU,
                     'upcomingTPS' => $format_tps_mendatang,
+                    'list_rw' => $list_rw,
                     'tahun' => $tahun
                 ],
             ], Response::HTTP_OK);

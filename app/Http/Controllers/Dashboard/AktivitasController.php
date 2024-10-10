@@ -21,6 +21,7 @@ use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\Aktivitas\ImportAktivitasRequest;
 use App\Http\Requests\Aktivitas\StoreAktivitasPelaksanaRequest;
 use App\Http\Requests\Aktivitas\UpdateAktivitasPelaksanaRequest;
+use App\Models\StatusAktivitasRw;
 
 class AktivitasController extends Controller
 {
@@ -234,7 +235,7 @@ class AktivitasController extends Controller
         // Simpan data aktivitas
         $aktivitas = AktivitasPelaksana::create([
             'pelaksana' => $validatedData['pelaksana_id'],
-            'status_aktivitas' => 1,
+            'status_aktivitas' => $validatedData['status_aktivitas'], // masukkan kedalam request
             'deskripsi' => $validatedData['deskripsi'] ?? null,
             'tgl_mulai' => $validatedData['tgl_mulai'],
             'tgl_selesai' => $validatedData['tgl_selesai'],
@@ -244,6 +245,36 @@ class AktivitasController extends Controller
             'potensi_suara' => $validatedData['potensi_suara'],
             'kelurahan' => $kelurahan->id,
         ]);
+
+        // 1. cek kelurahan dan rw ada tidak
+        $statusAktivitasRw = StatusAktivitasRw::where('kelurahan_id', $kelurahan->id)
+            // ->where('status_aktivitas', $validatedData['status_aktivitas'])
+            ->where('rw', $validatedData['rw'])
+            ->first();
+        if ($statusAktivitasRw) {
+            // Jika ada, update status_aktivitas
+            $statusAktivitasRw->update([
+                'status_aktivitas' => $validatedData['status_aktivitas']
+            ]);
+        } else {
+            // Jika belum ada, buat baru di status_aktivitas_rws
+            $statusAktivitasRw = StatusAktivitasRw::create([
+                'kelurahan_id' => $kelurahan->id,
+                'rw' => $validatedData['rw'],
+                'status_aktivitas' => $validatedData['status_aktivitas']
+            ]);
+        }
+
+        // 2. abistu update status_aktivitas_rw ids
+        $aktivitas->update([
+            'status_aktivitas_rw' => $statusAktivitasRw->id
+        ]);
+
+        // setelah create aktivitas, langsung create status_aktivitas_rws (samakan untuk kelurahan id dan status aktivitas) dan isi status_aktivitas_rw (ditabel aktivitas - method update) dengan id status_aktivitas_rws
+
+        // jika case create aktivitas dengan kelurahan id dan rw yang sama, maka tetap create aktivitas dan lakukan update status_aktivitas_rws dengan status_aktivitas yang baru 
+
+        // dan tampilkan didalam fungsi indexSuaraKPU bebarengan dengan aktivitas
 
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
