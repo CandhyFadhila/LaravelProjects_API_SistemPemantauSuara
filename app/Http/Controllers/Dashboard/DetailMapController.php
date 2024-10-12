@@ -160,6 +160,8 @@ class DetailMapController extends Controller
                     'data' => null
                 ], Response::HTTP_OK);
             }
+            $jumlah_pdi = $suaraKPU->where('partai_id', 4)->sum('jumlah_suara');
+            $jumlah_lainnya = $suaraKPU->where('partai_id', '!=', 4)->sum('jumlah_suara');
 
             $upcomingTPS = UpcomingTps::whereIn('kelurahan_id', $kelurahanIds)
                 ->whereIn('tahun', $tahun)
@@ -191,7 +193,6 @@ class DetailMapController extends Controller
                     $list_rw = array_merge($list_rw, $rwList); // Gabungkan array RW ke $list_rw
                 }
             }
-
 
             $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
             $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
@@ -260,6 +261,10 @@ class DetailMapController extends Controller
                     'table' => $format_suaraKPU,
                     'upcomingTPS' => $format_tps_mendatang,
                     'list_rw' => $list_rw,
+                    'perbandingan_pdi' => [
+                        'partai_pdi' => $jumlah_pdi,
+                        'partai_lainnya' => $jumlah_lainnya
+                    ],
                     'tahun' => $tahun
                 ],
             ], Response::HTTP_OK);
