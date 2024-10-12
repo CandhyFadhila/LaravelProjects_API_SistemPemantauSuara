@@ -187,6 +187,27 @@ class AktivitasController extends Controller
                     'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
                 'potensi_suara' => $aktivitas->potensi_suara,
+                'status_aktivitas_rw' => $aktivitas->aktivitas_rws ? [
+                    'id' => $aktivitas->aktivitas_rws->id,
+                    'kelurahan' => $aktivitas->aktivitas_rws->kelurahans ? [
+                        'id' => $aktivitas->aktivitas_rws->kelurahans->id,
+                        'nama_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->kode_kelurahan,
+                        'max_rw' => $aktivitas->aktivitas_rws->kelurahans->max_rw,
+                        'kecamatan' => $aktivitas->aktivitas_rws->kelurahans->kecamatans,
+                        'kabupaten' => $aktivitas->aktivitas_rws->kelurahans->kabupaten_kotas,
+                        'provinsi' => $aktivitas->aktivitas_rws->kelurahans->provinsis,
+                        'created_at' => $aktivitas->aktivitas_rws->kelurahans->created_at,
+                        'updated_at' => $aktivitas->aktivitas_rws->kelurahans->updated_at
+                    ] : null,
+                    'rw' => $aktivitas->aktivitas_rws->rw,
+                    'status_aktivitas' => $aktivitas->status ? [
+                        'id' => $aktivitas->status->id,
+                        'label' => $aktivitas->status->label,
+                        'created_at' => $aktivitas->status->created_at,
+                        'updated_at' => $aktivitas->status->updated_at
+                    ] : null,
+                ] : null,
                 'created_at' => $aktivitas->created_at,
                 'updated_at' => $aktivitas->updated_at,
             ];
@@ -403,6 +424,27 @@ class AktivitasController extends Controller
                 'updated_at' => $aktivitas->kelurahans->updated_at
             ] : null,
             'potensi_suara' => $aktivitas->potensi_suara,
+            'status_aktivitas_rw' => $aktivitas->aktivitas_rws ? [
+                'id' => $aktivitas->aktivitas_rws->id,
+                'kelurahan' => $aktivitas->aktivitas_rws->kelurahans ? [
+                    'id' => $aktivitas->aktivitas_rws->kelurahans->id,
+                    'nama_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->nama_kelurahan,
+                    'kode_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->kode_kelurahan,
+                    'max_rw' => $aktivitas->aktivitas_rws->kelurahans->max_rw,
+                    'kecamatan' => $aktivitas->aktivitas_rws->kelurahans->kecamatans,
+                    'kabupaten' => $aktivitas->aktivitas_rws->kelurahans->kabupaten_kotas,
+                    'provinsi' => $aktivitas->aktivitas_rws->kelurahans->provinsis,
+                    'created_at' => $aktivitas->aktivitas_rws->kelurahans->created_at,
+                    'updated_at' => $aktivitas->aktivitas_rws->kelurahans->updated_at
+                ] : null,
+                'rw' => $aktivitas->aktivitas_rws->rw,
+                'status_aktivitas' => $aktivitas->status ? [
+                    'id' => $aktivitas->status->id,
+                    'label' => $aktivitas->status->label,
+                    'created_at' => $aktivitas->status->created_at,
+                    'updated_at' => $aktivitas->status->updated_at
+                ] : null,
+            ] : null,
             'created_at' => $aktivitas->created_at,
             'updated_at' => $aktivitas->updated_at,
         ];
@@ -436,15 +478,6 @@ class AktivitasController extends Controller
         $aktivitas->tgl_selesai = $validatedData['tgl_selesai'] ?? $aktivitas->tgl_selesai;
         $aktivitas->tempat_aktivitas = $validatedData['tempat_aktivitas'] ?? $aktivitas->tempat_aktivitas;
         $aktivitas->potensi_suara = $validatedData['potensi_suara'] ?? $aktivitas->potensi_suara;
-
-        $currentDate = now('Asia/Jakarta');
-        if ($currentDate->between($aktivitas->tgl_mulai, $aktivitas->tgl_selesai)) {
-            $aktivitas->status_aktivitas = 2;
-        } elseif ($currentDate->lt($aktivitas->tgl_mulai)) {
-            $aktivitas->status_aktivitas = 1;
-        } elseif ($currentDate->gt($aktivitas->tgl_selesai)) {
-            $aktivitas->status_aktivitas = 3;
-        }
 
         // Jika ada file foto aktivitas baru, simpan dan hapus yang lama
         if ($request->hasFile('foto_aktivitas')) {

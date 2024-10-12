@@ -17,6 +17,7 @@ class AktivitasPelaksana extends Model
         'status_aktivitas' => 'integer',
         'kelurahan' => 'integer',
         'rw' => 'integer',
+        'status_aktivitas_rw' => 'integer',
     ];
 
     /**
@@ -47,5 +48,15 @@ class AktivitasPelaksana extends Model
     public function kelurahans(): BelongsTo
     {
         return $this->belongsTo(Kelurahan::class, 'kelurahan', 'id');
+    }
+
+    /**
+     * Get the aktivitas_rws that owns the AktivitasPelaksana
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function aktivitas_rws(): BelongsTo
+    {
+        return $this->belongsTo(StatusAktivitasRw::class, 'status_aktivitas_rw', 'id');
     }
 }

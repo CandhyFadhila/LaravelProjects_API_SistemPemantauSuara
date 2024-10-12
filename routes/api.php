@@ -37,7 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-all-kecamatan', [PublikRequestController::class, 'getAllDataKecamatan']);
         Route::get('/get-all-kelurahan', [PublikRequestController::class, 'getAllDataKelurahan']);
         Route::get('/get-all-kelurahan-users/{userId}', [PublikRequestController::class, 'getKelurahanUserId']);
+        Route::get('/get-all-status-aktivitas', [PublikRequestController::class, 'getAllStatusAktivitas']);
         Route::get('/get-all-aktivitas', [PublikRequestController::class, 'getAllDataAktivitas']);
+        Route::get('/get-all-status-aktivitas-rw', [PublikRequestController::class, 'getAllStatusAktivitasRW']);
         Route::get('/get-all-suara-kpu', [PublikRequestController::class, 'getAllDataSuaraKPU']);
         Route::get('/get-all-tps-mendatang', [PublikRequestController::class, 'getAllDataUpcomingTPS']);
         Route::get('/get-users-profile/{userId}', [PublikRequestController::class, 'getProfileUser']);

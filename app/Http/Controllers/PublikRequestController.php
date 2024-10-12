@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Models\AktivitasPelaksana;
+use App\Models\StatusAktivitas;
+use App\Models\StatusAktivitasRw;
 use App\Models\SuaraKPU;
 use App\Models\UpcomingTps;
 
@@ -45,6 +47,76 @@ class PublikRequestController extends Controller
             'message' => 'Retrieving all roles',
             'data' => $roles->values()
         ], Response::HTTP_OK);
+    }
+
+    public function getAllStatusAktivitas()
+    {
+        if (!Gate::allows('view publikRequest')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        }
+
+        $status = StatusAktivitas::orderBy('created_at', 'desc')->get();
+        if ($status->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data status aktivitas tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
+        }
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Retrieving all status aktivitas',
+            'data' => $status
+        ], Response::HTTP_OK);
+    }
+
+    public function getAllStatusAktivitasRW()
+    {
+        if (!Gate::allows('view publikRequest')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        }
+
+        $status_rw = StatusAktivitasRw::orderBy('created_at', 'desc')->get();
+        if ($status_rw->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data status aktivitas rw tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
+        }
+
+        $formattedData = $status_rw->map(function ($status_rw) {
+            return [
+                'id' => $status_rw->id,
+                'kelurahan' => $status_rw->kelurahans ? [
+                    'id' => $status_rw->kelurahans->id,
+                    'nama_kelurahan' => $status_rw->kelurahans->nama_kelurahan,
+                    'kode_kelurahan' => $status_rw->kelurahans->kode_kelurahan,
+                    'max_rw' => $status_rw->kelurahans->max_rw,
+                    'kecamatan' => $status_rw->kelurahans->kecamatans,
+                    'kabupaten' => $status_rw->kelurahans->kabupaten_kotas,
+                    'provinsi' => $status_rw->kelurahans->provinsis,
+                    'created_at' => $status_rw->kelurahans->created_at,
+                    'updated_at' => $status_rw->kelurahans->updated_at
+                ] : null,
+                'rw' => $status_rw->rw,
+                'status_aktivitas' => $status_rw->aktivitas_status ? [
+                    'id' => $status_rw->aktivitas_status->id,
+                    'label' => $status_rw->aktivitas_status->label,
+                    'created_at' => $status_rw->aktivitas_status->created_at,
+                    'updated_at' => $status_rw->aktivitas_status->updated_at
+                ] : null,
+                'created_at' => $status_rw->created_at,
+                'updated_at' => $status_rw->updated_at,
+            ];
+        });
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Retrieving all suara kpu',
+            'data' => $formattedData
+        ]);
     }
 
     public function getAllDataUser()
@@ -581,6 +653,27 @@ class PublikRequestController extends Controller
                     'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
                 'potensi_suara' => $aktivitas->potensi_suara,
+                'status_aktivitas_rw' => $aktivitas->aktivitas_rws ? [
+                    'id' => $aktivitas->aktivitas_rws->id,
+                    'kelurahan' => $aktivitas->aktivitas_rws->kelurahans ? [
+                        'id' => $aktivitas->aktivitas_rws->kelurahans->id,
+                        'nama_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->nama_kelurahan,
+                        'kode_kelurahan' => $aktivitas->aktivitas_rws->kelurahans->kode_kelurahan,
+                        'max_rw' => $aktivitas->aktivitas_rws->kelurahans->max_rw,
+                        'kecamatan' => $aktivitas->aktivitas_rws->kelurahans->kecamatans,
+                        'kabupaten' => $aktivitas->aktivitas_rws->kelurahans->kabupaten_kotas,
+                        'provinsi' => $aktivitas->aktivitas_rws->kelurahans->provinsis,
+                        'created_at' => $aktivitas->aktivitas_rws->kelurahans->created_at,
+                        'updated_at' => $aktivitas->aktivitas_rws->kelurahans->updated_at
+                    ] : null,
+                    'rw' => $aktivitas->aktivitas_rws->rw,
+                    'status_aktivitas' => $aktivitas->status ? [
+                        'id' => $aktivitas->status->id,
+                        'label' => $aktivitas->status->label,
+                        'created_at' => $aktivitas->status->created_at,
+                        'updated_at' => $aktivitas->status->updated_at
+                    ] : null,
+                ] : null,
                 'created_at' => $aktivitas->created_at,
                 'updated_at' => $aktivitas->updated_at,
             ];
