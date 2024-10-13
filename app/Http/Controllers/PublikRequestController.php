@@ -17,6 +17,7 @@ use App\Models\StatusAktivitas;
 use App\Models\StatusAktivitasRw;
 use App\Models\SuaraKPU;
 use App\Models\UpcomingTps;
+use Illuminate\Http\Request;
 
 class PublikRequestController extends Controller
 {
@@ -532,6 +533,8 @@ class PublikRequestController extends Controller
             ];
         });
 
+
+
         return response()->json([
             'status' => Response::HTTP_OK,
             'message' => 'Retrieving all kelurahans',
@@ -783,5 +786,150 @@ class PublikRequestController extends Controller
             'message' => 'Retrieving all data prakiraan tps',
             'data' => $formattedData
         ]);
+    }
+
+    public function getDataMapsKelurahan(Request $request)
+    {
+        if (!Gate::allows('view publikRequest')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        }
+
+        $kategori_suara = $request->input('kategori_suara', []);
+        $tahun = $request->input('tahun', []);
+        if (empty($kategori_suara) || empty($tahun)) {
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => 'Kategori suara dan tahun diperlukan.',
+                'data' => null
+            ], Response::HTTP_OK);
+        }
+
+        $kelurahan = Kelurahan::all();
+        if ($kelurahan->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data kelurahan tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
+        }
+
+        $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahan->pluck('id'))
+            ->with('aktivitas_status')
+            ->get();
+        $formattedData = $kelurahan->map(function ($kelurahan) use ($statusAktivitasRw, $kategori_suara, $tahun) {
+            $maxRw = $kelurahan->max_rw;
+            $list_rw = array_fill(0, $maxRw, null);
+
+            foreach ($statusAktivitasRw as $status) {
+                if ($status->kelurahan_id == $kelurahan->id && $status->rw <= $maxRw) {
+                    $list_rw[$status->rw - 1] = $status->status_aktivitas;
+                }
+            }
+            $status_aktivitas_kelurahan = $this->determineStatusAktivitasKelurahan($list_rw);
+
+            $suara_kpu = SuaraKPU::where('kelurahan_id', $kelurahan->id)
+                ->whereIn('tahun', $tahun)
+                ->whereIn('kategori_suara_id', $kategori_suara)
+                ->get();
+            $suaraKpuByPartai = $suara_kpu->groupBy('partai_id')->map(function ($items) {
+                return [
+                    'jumlah_suara' => $items->sum('jumlah_suara'),  // Sum jumlah_suara per partai
+                    'partai_id' => $items->first()->partai_id       // Ambil partai_id dari grup
+                ];
+            });
+            // dd($suaraKpuByPartai);
+
+            // Urutkan partai berdasarkan jumlah suara terbanyak
+            $partaiWithMaxSuara = $suaraKpuByPartai->sortByDesc('jumlah_suara')->first();
+            // dd($partaiWithMaxSuara);
+
+            $suara_kpu_terbanyak = null;
+            if ($partaiWithMaxSuara) {
+                // Ambil nama partai dari data suara kpu pertama yang sesuai dengan partai_id terbanyak
+                $partai = $suara_kpu->firstWhere('partai_id', $partaiWithMaxSuara['partai_id'])->partais ?? null;
+                if ($partai) {
+                    $suara_kpu_terbanyak = [
+                        'partai' => [
+                            'id' => $partai->id,
+                            'nama' => $partai->nama,
+                            'color' => $partai->color,
+                            'created_at' => $partai->created_at,
+                            'updated_at' => $partai->updated_at
+                        ],
+                        'jumlah_suara' => $partaiWithMaxSuara['jumlah_suara']
+                    ];
+                }
+            }
+
+            return [
+                'id' => $kelurahan->id,
+                'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                'max_rw' => $kelurahan->max_rw,
+                'kecamatan' => $kelurahan->kecamatans,
+                'kabupaten' => $kelurahan->kabupaten_kotas,
+                'provinsi' => $kelurahan->provinsis,
+                // 'list_rw' => $list_rw, // buat debug
+                'status_aktivitas_kelurahan' => $status_aktivitas_kelurahan,
+                'suara_kpu_terbanyak' => $suara_kpu_terbanyak,
+                'created_at' => $kelurahan->created_at,
+                'updated_at' => $kelurahan->updated_at
+            ];
+        });
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Retrieving all kelurahans with kpus',
+            'data' => $formattedData
+        ]);
+    }
+
+    private function determineStatusAktivitasKelurahan($list_rw)
+    {
+        $hasNull = in_array(null, $list_rw, true);
+        $hasAlatPeraga = in_array(1, $list_rw);
+        $allSosialisasi = count(array_filter($list_rw, fn($val) => $val === 2)) === count($list_rw);
+
+        // Jika ada null dalam array
+        if ($hasNull) {
+            return [
+                "id" => null,
+                "label" => null,
+                "color" => "FFFFFF",
+                "created_at" => null,
+                "updated_at" => null
+            ];
+        }
+
+        // Jika ada "Alat Peraga"
+        if ($hasAlatPeraga) {
+            return [
+                "id" => 1,
+                "label" => "Alat Peraga",
+                "color" => "00CCFF",
+                "created_at" => "2024-10-13T04:32:22.000000Z",
+                "updated_at" => "2024-10-13T04:32:22.000000Z"
+            ];
+        }
+
+        // Jika semua status adalah "Sosialisasi"
+        if ($allSosialisasi) {
+            return [
+                "id" => 2,
+                "label" => "Sosialisasi",
+                "color" => "0C6091",
+                "created_at" => "2024-10-13T04:32:22.000000Z",
+                "updated_at" => "2024-10-13T04:32:22.000000Z"
+            ];
+        }
+
+        // Default, return null status
+        return [
+            "id" => null,
+            "label" => null,
+            "color" => "FFFFFF",
+            "created_at" => null,
+            "updated_at" => null
+        ];
     }
 }

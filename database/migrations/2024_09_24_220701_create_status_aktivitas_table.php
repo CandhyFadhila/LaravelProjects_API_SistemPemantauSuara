@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('status_aktivitas', function (Blueprint $table) {
             $table->id();
-            $table->string('label'); // 1 = Belum Terlaksana, 2 = Dilaksanakan, 3 = Telah Dilaksanakan
+            $table->string('label'); // 1 = Alat Peraga, 2 = Sosialiasi
             $table->timestamps();
         });
     }

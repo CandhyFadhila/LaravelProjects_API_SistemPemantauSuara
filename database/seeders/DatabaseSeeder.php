@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
 
             PartaiSeeder::class,
-            SuaraKPUSeeder::class,
+            // SuaraKPUSeeder::class,
             JenisDataSeeder::class,
 
             StatusAktivitasSeeder::class,

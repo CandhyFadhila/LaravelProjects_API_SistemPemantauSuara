@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-all-suara-kpu', [PublikRequestController::class, 'getAllDataSuaraKPU']);
         Route::get('/get-all-tps-mendatang', [PublikRequestController::class, 'getAllDataUpcomingTPS']);
         Route::get('/get-users-profile/{userId}', [PublikRequestController::class, 'getProfileUser']);
+        Route::post('/get-map-kelurahan', [PublikRequestController::class, 'getDataMapsKelurahan']);
     });
 
     // ! Dashboard
