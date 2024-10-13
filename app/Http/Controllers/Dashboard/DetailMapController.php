@@ -160,8 +160,6 @@ class DetailMapController extends Controller
                     'data' => null
                 ], Response::HTTP_OK);
             }
-            // $jumlah_pdi = $suaraKPU->where('partai_id', 4)->sum('jumlah_suara');
-            // $jumlah_lainnya = $suaraKPU->where('partai_id', '!=', 4)->sum('jumlah_suara');
 
             $upcomingTPS = UpcomingTps::whereIn('kelurahan_id', $kelurahanIds)
                 ->whereIn('tahun', $tahun)
@@ -174,25 +172,27 @@ class DetailMapController extends Controller
                 ], Response::HTTP_OK);
             }
 
-            // $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
-            // $list_rw = [];
-            // foreach ($kelurahanIds as $kelurahanId) {
-            //     $kelurahan = Kelurahan::find($kelurahanId);
-            //     if ($kelurahan) {
-            //         $maxRw = $kelurahan->max_rw; // Dapatkan max_rw dari kelurahan
-            //         $rwList = array_fill(0, $maxRw, null); // Inisialisasi list dengan null
+            $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
+            $list_rw = [];
+            foreach ($kelurahanIds as $kelurahanId) {
+                $kelurahan = Kelurahan::find($kelurahanId);
+                if ($kelurahan) {
+                    $maxRw = $kelurahan->max_rw; // Dapatkan max_rw dari kelurahan
+                    $rwList = array_fill(0, $maxRw, null); // Inisialisasi list dengan null
 
-            //         // Cek status untuk setiap RW
-            //         foreach ($statusAktivitasRw as $status) {
-            //             if ($status->kelurahan_id == $kelurahanId && $status->rw <= $maxRw) {
-            //                 $rwList[$status->rw - 1] = $status->status_aktivitas; // Tampilkan status_aktivitas untuk RW yang sesuai
-            //             }
-            //         }
+                    // Cek status untuk setiap RW
+                    foreach ($statusAktivitasRw as $status) {
+                        if ($status->kelurahan_id == $kelurahanId && $status->rw <= $maxRw) {
+                            $rwList[$status->rw - 1] = $status->status_aktivitas; // Tampilkan status_aktivitas untuk RW yang sesuai
+                        }
+                    }
 
-            //         // Gabungkan hasil ke array $list_rw,
-            //         $list_rw = array_merge($list_rw, $rwList); // Gabungkan array RW ke $list_rw
-            //     }
-            // }
+                    // Gabungkan hasil ke array $list_rw,
+                    $list_rw = array_merge($list_rw, $rwList);
+
+                    $transformed_rw_list = $this->transformRwList($rwList);
+                }
+            }
 
             $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
             $groupedByPartai = $suaraKPU->where('kelurahan_id', $firstKelurahanId)->groupBy('partai_id');
@@ -253,6 +253,34 @@ class DetailMapController extends Controller
                 'updated_at' => $upcomingTPS->updated_at
             ];
 
+            $suaraKpuByPartai = $suaraKPU->groupBy('partai_id')->map(function ($items) {
+                return [
+                    'jumlah_suara' => $items->sum('jumlah_suara'),  // Sum jumlah_suara per partai
+                    'partai_id' => $items->first()->partai_id       // Ambil partai_id dari grup
+                ];
+            });
+            // dd($suaraKpuByPartai);
+            $partaiWithMaxSuara = $suaraKpuByPartai->sortByDesc('jumlah_suara')->first();
+            // dd($partaiWithMaxSuara);
+            $suara_kpu_terbanyak = null;
+            if ($partaiWithMaxSuara) {
+                $partai = $suaraKPU->firstWhere('partai_id', $partaiWithMaxSuara['partai_id'])->partais ?? null;
+                // dd($partai);
+                if ($partai) {
+                    $suara_kpu_terbanyak = [
+                        'partai' => [
+                            'id' => $partai->id,
+                            'nama' => $partai->nama,
+                            'color' => $partai->color,
+                            'created_at' => $partai->created_at,
+                            'updated_at' => $partai->updated_at
+                        ],
+                        'jumlah_suara' => $partaiWithMaxSuara['jumlah_suara']
+                    ];
+                }
+            }
+            $status_aktivitas_kelurahan = $this->determineStatusAktivitasKelurahan($list_rw);
+
             return response()->json([
                 'status' => Response::HTTP_OK,
                 'message' => 'Data suara KPU berhasil ditampilkan.',
@@ -260,6 +288,9 @@ class DetailMapController extends Controller
                     'chart' => $format_chart,
                     'table' => $format_suaraKPU,
                     'upcomingTPS' => $format_tps_mendatang,
+                    'suara_kpu_terbanyak' => $suara_kpu_terbanyak,
+                    'status_aktivitas_kelurahan' => $status_aktivitas_kelurahan,
+                    'list_rw' => $transformed_rw_list,
                     'tahun' => $tahun
                 ],
             ], Response::HTTP_OK);
@@ -270,5 +301,85 @@ class DetailMapController extends Controller
                 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private function determineStatusAktivitasKelurahan($list_rw)
+    {
+        $hasNull = in_array(null, $list_rw, true);
+        $hasAlatPeraga = in_array(1, $list_rw);
+        $allSosialisasi = count(array_filter($list_rw, fn($val) => $val === 2)) === count($list_rw);
+
+        // Jika ada null dalam array
+        if ($hasNull) {
+            return [
+                "id" => null,
+                "label" => null,
+                "color" => "FFFFFF",
+                "created_at" => null,
+                "updated_at" => null
+            ];
+        }
+
+        // Jika ada "Alat Peraga"
+        if ($hasAlatPeraga) {
+            return [
+                "id" => 1,
+                "label" => "Alat Peraga",
+                "color" => "00CCFF",
+                "created_at" => "2024-10-13T04:32:22.000000Z",
+                "updated_at" => "2024-10-13T04:32:22.000000Z"
+            ];
+        }
+
+        // Jika semua status adalah "Sosialisasi"
+        if ($allSosialisasi) {
+            return [
+                "id" => 2,
+                "label" => "Sosialisasi",
+                "color" => "0C6091",
+                "created_at" => "2024-10-13T04:32:22.000000Z",
+                "updated_at" => "2024-10-13T04:32:22.000000Z"
+            ];
+        }
+
+        // Default, return null status
+        return [
+            "id" => null,
+            "label" => null,
+            "color" => "FFFFFF",
+            "created_at" => null,
+            "updated_at" => null
+        ];
+    }
+
+    private function transformRwList($rwList)
+    {
+        return array_map(function ($rwStatus) {
+            if ($rwStatus === 1) {
+                return [
+                    "id" => 1,
+                    "label" => "Alat Peraga",
+                    "color" => "00CCFF",
+                    "created_at" => "2024-10-13T04:32:22.000000Z",
+                    "updated_at" => "2024-10-13T04:32:22.000000Z"
+                ];
+            } elseif ($rwStatus === 2) {
+                return [
+                    "id" => 2,
+                    "label" => "Sosialisasi",
+                    "color" => "0C6091",
+                    "created_at" => "2024-10-13T04:32:22.000000Z",
+                    "updated_at" => "2024-10-13T04:32:22.000000Z"
+                ];
+            } else {
+                return [
+                    "id" => null,
+                    "label" => null,
+                    "color" => "FFFFFF",
+                    "created_at" => null,
+                    "updated_at" => null
+                ];
+            }
+        }, $rwList);
     }
 }
