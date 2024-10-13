@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\StatusAktivitasHelper;
 use App\Models\SuaraKPU;
 use App\Models\Kelurahan;
 use Illuminate\Http\Request;
@@ -190,7 +191,7 @@ class DetailMapController extends Controller
                     // Gabungkan hasil ke array $list_rw,
                     $list_rw = array_merge($list_rw, $rwList);
 
-                    $transformed_rw_list = $this->transformRwList($rwList);
+                    $transformed_rw_list = StatusAktivitasHelper::TransformRwList($rwList);
                 }
             }
 
@@ -279,7 +280,7 @@ class DetailMapController extends Controller
                     ];
                 }
             }
-            $status_aktivitas_kelurahan = $this->determineStatusAktivitasKelurahan($list_rw);
+            $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
 
             return response()->json([
                 'status' => Response::HTTP_OK,
@@ -301,85 +302,5 @@ class DetailMapController extends Controller
                 'message' => 'Terjadi kesalahan pada server. Silakan coba lagi nanti.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    private function determineStatusAktivitasKelurahan($list_rw)
-    {
-        $hasNull = in_array(null, $list_rw, true);
-        $hasAlatPeraga = in_array(1, $list_rw);
-        $allSosialisasi = count(array_filter($list_rw, fn($val) => $val === 2)) === count($list_rw);
-
-        // Jika ada null dalam array
-        if ($hasNull) {
-            return [
-                "id" => null,
-                "label" => null,
-                "color" => "FFFFFF",
-                "created_at" => null,
-                "updated_at" => null
-            ];
-        }
-
-        // Jika ada "Alat Peraga"
-        if ($hasAlatPeraga) {
-            return [
-                "id" => 1,
-                "label" => "Alat Peraga",
-                "color" => "00CCFF",
-                "created_at" => "2024-10-13T04:32:22.000000Z",
-                "updated_at" => "2024-10-13T04:32:22.000000Z"
-            ];
-        }
-
-        // Jika semua status adalah "Sosialisasi"
-        if ($allSosialisasi) {
-            return [
-                "id" => 2,
-                "label" => "Sosialisasi",
-                "color" => "0C6091",
-                "created_at" => "2024-10-13T04:32:22.000000Z",
-                "updated_at" => "2024-10-13T04:32:22.000000Z"
-            ];
-        }
-
-        // Default, return null status
-        return [
-            "id" => null,
-            "label" => null,
-            "color" => "FFFFFF",
-            "created_at" => null,
-            "updated_at" => null
-        ];
-    }
-
-    private function transformRwList($rwList)
-    {
-        return array_map(function ($rwStatus) {
-            if ($rwStatus === 1) {
-                return [
-                    "id" => 1,
-                    "label" => "Alat Peraga",
-                    "color" => "00CCFF",
-                    "created_at" => "2024-10-13T04:32:22.000000Z",
-                    "updated_at" => "2024-10-13T04:32:22.000000Z"
-                ];
-            } elseif ($rwStatus === 2) {
-                return [
-                    "id" => 2,
-                    "label" => "Sosialisasi",
-                    "color" => "0C6091",
-                    "created_at" => "2024-10-13T04:32:22.000000Z",
-                    "updated_at" => "2024-10-13T04:32:22.000000Z"
-                ];
-            } else {
-                return [
-                    "id" => null,
-                    "label" => null,
-                    "color" => "FFFFFF",
-                    "created_at" => null,
-                    "updated_at" => null
-                ];
-            }
-        }, $rwList);
     }
 }

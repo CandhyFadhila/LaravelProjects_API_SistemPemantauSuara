@@ -3,21 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\SuaraKPU;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
+use App\Models\UpcomingTps;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\StatusAktivitas;
+use App\Models\StatusAktivitasRw;
+use App\Models\AktivitasPelaksana;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Helpers\StatusAktivitasHelper;
 use App\Http\Resources\public\WithoutDataResource;
-use App\Models\AktivitasPelaksana;
-use App\Models\StatusAktivitas;
-use App\Models\StatusAktivitasRw;
-use App\Models\SuaraKPU;
-use App\Models\UpcomingTps;
-use Illuminate\Http\Request;
 
 class PublikRequestController extends Controller
 {
@@ -825,7 +826,7 @@ class PublikRequestController extends Controller
                     $list_rw[$status->rw - 1] = $status->status_aktivitas;
                 }
             }
-            $status_aktivitas_kelurahan = $this->determineStatusAktivitasKelurahan($list_rw);
+            $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
 
             $suara_kpu = SuaraKPU::where('kelurahan_id', $kelurahan->id)
                 ->whereIn('tahun', $tahun)
@@ -882,54 +883,5 @@ class PublikRequestController extends Controller
             'message' => 'Retrieving all kelurahans with kpus',
             'data' => $formattedData
         ]);
-    }
-
-    private function determineStatusAktivitasKelurahan($list_rw)
-    {
-        $hasNull = in_array(null, $list_rw, true);
-        $hasAlatPeraga = in_array(1, $list_rw);
-        $allSosialisasi = count(array_filter($list_rw, fn($val) => $val === 2)) === count($list_rw);
-
-        // Jika ada null dalam array
-        if ($hasNull) {
-            return [
-                "id" => null,
-                "label" => null,
-                "color" => "FFFFFF",
-                "created_at" => null,
-                "updated_at" => null
-            ];
-        }
-
-        // Jika ada "Alat Peraga"
-        if ($hasAlatPeraga) {
-            return [
-                "id" => 1,
-                "label" => "Alat Peraga",
-                "color" => "00CCFF",
-                "created_at" => "2024-10-13T04:32:22.000000Z",
-                "updated_at" => "2024-10-13T04:32:22.000000Z"
-            ];
-        }
-
-        // Jika semua status adalah "Sosialisasi"
-        if ($allSosialisasi) {
-            return [
-                "id" => 2,
-                "label" => "Sosialisasi",
-                "color" => "0C6091",
-                "created_at" => "2024-10-13T04:32:22.000000Z",
-                "updated_at" => "2024-10-13T04:32:22.000000Z"
-            ];
-        }
-
-        // Default, return null status
-        return [
-            "id" => null,
-            "label" => null,
-            "color" => "FFFFFF",
-            "created_at" => null,
-            "updated_at" => null
-        ];
     }
 }
