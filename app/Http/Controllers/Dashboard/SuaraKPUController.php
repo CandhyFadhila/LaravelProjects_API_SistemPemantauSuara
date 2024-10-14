@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Dashboard;
 
-use App\Exports\KPU\SuaraKPUExport;
 use App\Models\SuaraKPU;
+use App\Models\Kelurahan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Exports\KPU\SuaraKPUExport;
 use App\Imports\KPU\SuaraKPUImport;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\KPU\ImportSuaraKPURequest;
 use App\Http\Resources\public\WithoutDataResource;
 
@@ -56,6 +58,7 @@ class SuaraKPUController extends Controller
             try {
                 ini_set('max_execution_time', 500);
                 Excel::import(new SuaraKPUImport, $file['kpu_file']);
+                Cache::tags(['suara_kpus'])->flush();
             } catch (\Exception $e) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Maaf sepertinya terjadi kesalahan.' . $e->getMessage()), Response::HTTP_NOT_ACCEPTABLE);
             }

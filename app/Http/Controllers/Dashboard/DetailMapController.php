@@ -26,6 +26,13 @@ class DetailMapController extends Controller
 
             $kode_kelurahan = $request->input('kode_kelurahan', []);
             $tahun = $request->input('tahun', []);
+            if (empty($kode_kelurahan) || empty($tahun)) {
+                return response()->json([
+                    'status' => Response::HTTP_BAD_REQUEST,
+                    'message' => 'Kode kelurahan dan tahun diperlukan.',
+                    'data' => null
+                ], Response::HTTP_BAD_REQUEST);
+            }
 
             // Cari kelurahan berdasarkan array kode_kelurahan
             $kelurahanIds = Kelurahan::whereIn('kode_kelurahan', $kode_kelurahan)->pluck('id');
@@ -93,18 +100,29 @@ class DetailMapController extends Controller
                 ];
             })->values();
 
-            $format_chart = $aktivitas->map(function ($item) {
-                return [
-                    'rw' => $item->rw,
-                    'potensi_suara' => $item->potensi_suara
-                ];
-            })->values();
+            $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
+            foreach ($kelurahanIds as $kelurahanId) {
+                $kelurahan = Kelurahan::find($kelurahanId);
+                if ($kelurahan) {
+                    $maxRw = $kelurahan->max_rw; // Dapatkan max_rw dari kelurahan
+                    $rwList = array_fill(0, $maxRw, null); // Inisialisasi list dengan null
+
+                    // Cek status untuk setiap RW
+                    foreach ($statusAktivitasRw as $status) {
+                        if ($status->kelurahan_id == $kelurahanId && $status->rw <= $maxRw) {
+                            $rwList[$status->rw - 1] = $status->status_aktivitas; // Tampilkan status_aktivitas untuk RW yang sesuai
+                        }
+                    }
+
+                    $transformed_rw_list = StatusAktivitasHelper::TransformRwList($rwList);
+                }
+            }
 
             return response()->json([
                 'status' => Response::HTTP_OK,
                 'message' => 'Data aktivitas dan chart berhasil ditampilkan.',
                 'data' => [
-                    'chart' => $format_chart,
+                    'chart' => $transformed_rw_list,
                     'table' => $format_aktivitas,
                     'tahun' => $tahun
                 ],
@@ -127,13 +145,12 @@ class DetailMapController extends Controller
 
             $kode_kelurahan = $request->input('kode_kelurahan', []);
             $tahun = $request->input('tahun', []);
-
             if (empty($kode_kelurahan) || empty($tahun)) {
                 return response()->json([
                     'status' => Response::HTTP_BAD_REQUEST,
                     'message' => 'Kode kelurahan dan tahun diperlukan.',
                     'data' => null
-                ], Response::HTTP_OK);
+                ], Response::HTTP_BAD_REQUEST);
             }
 
             // Step 1: Cari kelurahan berdasarkan array kode_kelurahan
@@ -171,28 +188,6 @@ class DetailMapController extends Controller
                     'message' => 'Data TPS mendatang tidak ditemukan untuk kelurahan ini di tahun yang dipilih.',
                     'data' => null
                 ], Response::HTTP_OK);
-            }
-
-            $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
-            $list_rw = [];
-            foreach ($kelurahanIds as $kelurahanId) {
-                $kelurahan = Kelurahan::find($kelurahanId);
-                if ($kelurahan) {
-                    $maxRw = $kelurahan->max_rw; // Dapatkan max_rw dari kelurahan
-                    $rwList = array_fill(0, $maxRw, null); // Inisialisasi list dengan null
-
-                    // Cek status untuk setiap RW
-                    foreach ($statusAktivitasRw as $status) {
-                        if ($status->kelurahan_id == $kelurahanId && $status->rw <= $maxRw) {
-                            $rwList[$status->rw - 1] = $status->status_aktivitas; // Tampilkan status_aktivitas untuk RW yang sesuai
-                        }
-                    }
-
-                    // Gabungkan hasil ke array $list_rw,
-                    $list_rw = array_merge($list_rw, $rwList);
-
-                    $transformed_rw_list = StatusAktivitasHelper::TransformRwList($rwList);
-                }
             }
 
             $firstKelurahanId = $suaraKPU->first()->kelurahan_id;
@@ -280,7 +275,7 @@ class DetailMapController extends Controller
                     ];
                 }
             }
-            $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
+            // $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
 
             return response()->json([
                 'status' => Response::HTTP_OK,
@@ -290,8 +285,6 @@ class DetailMapController extends Controller
                     'table' => $format_suaraKPU,
                     'upcomingTPS' => $format_tps_mendatang,
                     'suara_kpu_terbanyak' => $suara_kpu_terbanyak,
-                    'status_aktivitas_kelurahan' => $status_aktivitas_kelurahan,
-                    'list_rw' => $transformed_rw_list,
                     'tahun' => $tahun
                 ],
             ], Response::HTTP_OK);

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\KPU\StoreUpcomingTPSRequest;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\KPU\UpdateUpcomingTPSRequest;
+use Illuminate\Support\Facades\Cache;
 
 class UpcomingTPSController extends Controller
 {
@@ -28,6 +29,8 @@ class UpcomingTPSController extends Controller
                 'tahun' => $validatedData['tahun'],
                 'jumlah_tps' => $validatedData['jumlah_tps'],
             ]);
+
+            Cache::tags('upcoming_tps')->flush();
 
             return response()->json([
                 'status' => Response::HTTP_CREATED,

@@ -8,12 +8,14 @@ use App\Helpers\DateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Helpers\FileUploadHelper;
+use App\Models\StatusAktivitasRw;
 use App\Models\AktivitasPelaksana;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use App\Exports\Aktivitas\AktivitasExport;
 use App\Imports\Aktivitas\AktivitasImport;
 use App\Helpers\Filters\AktivitasFilterHelper;
@@ -21,7 +23,6 @@ use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\Aktivitas\ImportAktivitasRequest;
 use App\Http\Requests\Aktivitas\StoreAktivitasPelaksanaRequest;
 use App\Http\Requests\Aktivitas\UpdateAktivitasPelaksanaRequest;
-use App\Models\StatusAktivitasRw;
 
 class AktivitasController extends Controller
 {
@@ -33,14 +34,19 @@ class AktivitasController extends Controller
 
         $limit = $request->input('limit', 10);
         $loggedInUser = auth()->user();
+        $cacheTag = 'aktivitas';
+
         if ($loggedInUser->role_id == 1) {
             $aktivitas_pelaksana = AktivitasPelaksana::query()->orderBy('created_at', 'desc');
+            $cacheKey = 'aktivitas_role_1';
         } elseif ($loggedInUser->role_id == 2) {
             $aktivitas_pelaksana = AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
                 $query->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
             })->orderBy('created_at', 'desc');
+            $cacheKey = 'aktivitas_role_2';
         } elseif ($loggedInUser->role_id == 3) {
             $aktivitas_pelaksana = AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc');
+            $cacheKey = 'aktivitas_role_3';
         } else {
             return response()->json([
                 'status' => Response::HTTP_FORBIDDEN,
@@ -50,6 +56,10 @@ class AktivitasController extends Controller
 
         $filters = $request->all();
         $aktivitas = AktivitasFilterHelper::applyFiltersAktivitas($aktivitas_pelaksana, $filters);
+
+        $data_aktivitas = Cache::tags([$cacheTag])->rememberForever($cacheKey, function () use ($aktivitas_pelaksana) {
+            return $aktivitas_pelaksana->get();
+        });
 
         if ($limit == 0) {
             $data_aktivitas = $aktivitas->get();
@@ -168,7 +178,6 @@ class AktivitasController extends Controller
                     'created_at' => $aktivitas->pelaksana_users->created_at,
                     'updated_at' => $aktivitas->pelaksana_users->updated_at
                 ] : null,
-                'status_aktivitas' => $aktivitas->status_aktivitas,
                 'deskripsi' => $aktivitas->deskripsi,
                 'tgl_mulai' => $aktivitas->tgl_mulai,
                 'tgl_selesai' => $aktivitas->tgl_selesai,
@@ -297,6 +306,8 @@ class AktivitasController extends Controller
 
         // dan tampilkan didalam fungsi indexSuaraKPU bebarengan dengan aktivitas
 
+        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws'])->flush();
+
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
             'status' => Response::HTTP_CREATED,
@@ -311,7 +322,6 @@ class AktivitasController extends Controller
         }
 
         $aktivitas = AktivitasPelaksana::find($id);
-
         if (!$aktivitas) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,

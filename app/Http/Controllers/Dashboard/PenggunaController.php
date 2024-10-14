@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\Pengguna\PenggunaExport;
 use App\Helpers\Filters\UserFilterHelper;
@@ -32,15 +33,18 @@ class PenggunaController extends Controller
 
         $loggedInUser = auth()->user();
         $limit = $request->input('limit', 10);
+        $cacheTag = 'users';
 
         if ($loggedInUser->role_id == 1) {
             $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
+            $cacheKey = 'user_role_1';
         } elseif ($loggedInUser->role_id == 2) {
             $query = User::query()
                 ->where('role_id', 3)
                 ->where('status_aktif', 2)
                 ->where('pj_pelaksana', $loggedInUser->id)
                 ->orderBy('created_at', 'desc');
+            $cacheKey = 'user_role_2';
         } else {
             return response()->json([
                 'status' => Response::HTTP_FORBIDDEN,
@@ -48,9 +52,12 @@ class PenggunaController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-
         $filters = $request->all();
         $query = UserFilterHelper::applyFiltersUser($query, $filters);
+
+        $users = Cache::tags([$cacheTag])->rememberForever($cacheKey, function () use ($query) {
+            return $query->get();
+        });
 
         if ($limit == 0) {
             $users = $query->get();
@@ -285,6 +292,8 @@ class PenggunaController extends Controller
                 'message' => 'Role tidak ditemukan.'
             ], Response::HTTP_BAD_REQUEST);
         }
+
+        Cache::tags('users')->flush();
 
         return response()->json([
             'status' => Response::HTTP_CREATED,

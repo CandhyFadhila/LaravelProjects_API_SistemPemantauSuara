@@ -17,7 +17,7 @@ class AktivitasFilterHelper
 	{
 		if (isset($filters['status_aktivitas'])) {
 			$statusAktivitas = $filters['status_aktivitas'];
-			$query->whereHas('status_aktivitas', function ($query) use ($statusAktivitas) {
+			$query->whereHas('status', function ($query) use ($statusAktivitas) {
 				if (is_array($statusAktivitas)) {
 					$query->whereIn('id', $statusAktivitas);
 				} else {
