@@ -76,7 +76,12 @@ class DetailMapController extends Controller
                         'created_at' => $item->pelaksana_users->created_at,
                         'updated_at' => $item->pelaksana_users->updated_at
                     ] : null,
-                    'status_aktivitas' => $item->status,
+                    'status_aktivitas' => $item->status ? [
+                        'id' => $item->status->id,
+                        'label' => $item->status->label,
+                        'created_at' => $item->status->created_at,
+                        'updated_at' => $item->status->updated_at
+                    ] : null,
                     'deskripsi' => $item->deskripsi,
                     'tgl_mulai' => $item->tgl_mulai,
                     'tgl_selesai' => $item->tgl_selesai,

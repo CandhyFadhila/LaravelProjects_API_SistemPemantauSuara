@@ -196,6 +196,12 @@ class AktivitasController extends Controller
                     'updated_at' => $aktivitas->kelurahans->updated_at
                 ] : null,
                 'potensi_suara' => $aktivitas->potensi_suara,
+                'status_aktivitas' => $aktivitas->status ? [
+                    'id' => $aktivitas->status->id,
+                    'label' => $aktivitas->status->label,
+                    'created_at' => $aktivitas->status->created_at,
+                    'updated_at' => $aktivitas->status->updated_at
+                ] : null,
                 'status_aktivitas_rw' => $aktivitas->aktivitas_rws ? [
                     'id' => $aktivitas->aktivitas_rws->id,
                     'kelurahan' => $aktivitas->aktivitas_rws->kelurahans ? [
