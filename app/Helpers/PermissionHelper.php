@@ -77,6 +77,8 @@ class PermissionHelper
 				'import aktivitas',
 				'export aktivitas',
 
+				'view suaraKPU',
+
 				'create upcomingTPS',
 				'edit upcomingTPS',
 				'delete upcomingTPS',
