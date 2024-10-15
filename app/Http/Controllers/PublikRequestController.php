@@ -818,6 +818,9 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
+        $loggedInUser = Auth::user();
+        // dd($loggedInUser->kelurahan_id);
+
         $kategori_suara = $request->input('kategori_suara', []);
         $tahun = $request->input('tahun', []);
         if (empty($kategori_suara) || empty($tahun)) {
@@ -828,8 +831,8 @@ class PublikRequestController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $kelurahan = Cache::tags(['kelurahans'])->rememberForever('get_all_kelurahan', function () {
-            return Kelurahan::all();
+        $kelurahan = Cache::tags(['kelurahans'])->rememberForever('get_all_kelurahan', function () use ($loggedInUser) {
+            return Kelurahan::whereIn('id', $loggedInUser->kelurahan_id)->get();
         });
         if ($kelurahan->isEmpty()) {
             return response()->json([

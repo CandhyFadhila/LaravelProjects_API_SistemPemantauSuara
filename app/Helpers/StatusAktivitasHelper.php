@@ -15,7 +15,7 @@ class StatusAktivitasHelper
 			return [
 				"id" => null,
 				"label" => null,
-				"color" => "FFFFFF",
+				"color" => "F0F0F0",
 				"created_at" => null,
 				"updated_at" => null
 			];
@@ -76,7 +76,7 @@ class StatusAktivitasHelper
 				return [
 					"id" => null,
 					"label" => null,
-					"color" => "FFFFFF",
+					"color" => "F0F0F0",
 					"created_at" => null,
 					"updated_at" => null
 				];
