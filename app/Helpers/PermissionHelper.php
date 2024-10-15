@@ -20,9 +20,9 @@ class PermissionHelper
 				'import pengguna',
 				'export pengguna',
 
-				'create aktivitas',
-				'edit aktivitas',
-				'delete aktivitas',
+				// 'create aktivitas',
+				// 'edit aktivitas',
+				// 'delete aktivitas',
 				'view aktivitas',
 				'import aktivitas',
 				'export aktivitas',
@@ -72,7 +72,7 @@ class PermissionHelper
 
 				'create aktivitas',
 				'edit aktivitas',
-				'delete aktivitas',
+				// 'delete aktivitas',
 				'view aktivitas',
 				'import aktivitas',
 				'export aktivitas',

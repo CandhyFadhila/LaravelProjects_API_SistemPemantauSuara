@@ -2,10 +2,11 @@
 
 namespace App\Imports\KPU;
 
-use App\Models\KategoriSuara;
 use App\Models\Partai;
 use App\Models\SuaraKPU;
+use App\Models\Kecamatan;
 use App\Models\Kelurahan;
+use App\Models\KategoriSuara;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -17,12 +18,14 @@ class SuaraKPUImport implements ToModel, WithHeadingRow
 
     private $Partai;
     private $Kelurahan;
+    private $Kecamatan;
     private $KategoriSuara;
 
     public function __construct()
     {
         $this->Partai = Partai::select('id', 'nama')->get();
-        $this->Kelurahan = Kelurahan::select('id', 'nama_kelurahan')->get();
+        $this->Kelurahan = Kelurahan::select('id', 'nama_kelurahan', 'kecamatan_id')->get();
+        $this->Kecamatan = Kecamatan::select('id', 'nama_kecamatan')->get();
         $this->KategoriSuara = KategoriSuara::select('id', 'label')->get();
     }
 
@@ -70,7 +73,13 @@ class SuaraKPUImport implements ToModel, WithHeadingRow
 
     public function model(array $row)
     {
-        $kelurahan = $this->Kelurahan->where('nama_kelurahan', ucwords(strtolower($row['kelurahan'])))->first();
+        $kecamatan = $this->Kecamatan->where('nama_kecamatan', ucwords(strtolower($row['kecamatan'])))->first();
+        if (!$kecamatan) {
+            throw new \Exception("Kecamatan '" . $row['kecamatan'] . "' tidak ditemukan.");
+        }
+
+        $kelurahan = $this->Kelurahan->where('nama_kelurahan', ucwords(strtolower($row['kelurahan'])))
+            ->where('kecamatan_id', $kecamatan->id)->first();
         if (!$kelurahan) {
             throw new \Exception("Kelurahan '" . $row['kelurahan'] . "' tidak ditemukan.");
         }

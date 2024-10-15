@@ -312,7 +312,7 @@ class AktivitasController extends Controller
 
         // dan tampilkan didalam fungsi indexSuaraKPU bebarengan dengan aktivitas
 
-        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws'])->flush();
+        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws', 'status_aktivitas_rw'])->flush();
 
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
