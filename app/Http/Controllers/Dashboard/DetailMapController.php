@@ -105,6 +105,13 @@ class DetailMapController extends Controller
                 ];
             })->values();
 
+            $format_chart_2 = $aktivitas->map(function ($item) {
+                return [
+                    'rw' => $item->rw,
+                    'potensi_suara' => $item->potensi_suara
+                ];
+            })->values();
+
             $statusAktivitasRw = StatusAktivitasRw::whereIn('kelurahan_id', $kelurahanIds)->get();
             foreach ($kelurahanIds as $kelurahanId) {
                 $kelurahan = Kelurahan::find($kelurahanId);
@@ -128,6 +135,7 @@ class DetailMapController extends Controller
                 'message' => 'Data aktivitas dan chart berhasil ditampilkan.',
                 'data' => [
                     'chart' => $transformed_rw_list,
+                    'chart_2' => $format_chart_2,
                     'table' => $format_aktivitas,
                     'tahun' => $tahun
                 ],

@@ -869,7 +869,7 @@ class PublikRequestController extends Controller
                     ->whereIn('kategori_suara_id', $kategori_suara)
                     ->get();
             });
-            $suaraKpuByPartai = $suara_kpu->groupBy('partai_id')->map(function ($items) {
+            $suaraKpuByPartai = $suara_kpu->where('kelurahan_id', $kelurahan->id)->groupBy('partai_id')->map(function ($items) {
                 return [
                     'jumlah_suara' => $items->sum('jumlah_suara'),  // Sum jumlah_suara per partai
                     'partai_id' => $items->first()->partai_id       // Ambil partai_id dari grup
