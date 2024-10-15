@@ -41,7 +41,7 @@ class AktivitasController extends Controller
             $cacheKey = 'aktivitas_role_1';
         } elseif ($loggedInUser->role_id == 2) {
             $aktivitas_pelaksana = AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
-                $query->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+                $query->where('role_id', [2, 3])->where('pj_pelaksana', $loggedInUser->id);
             })->orderBy('created_at', 'desc');
             $cacheKey = 'aktivitas_role_2';
         } elseif ($loggedInUser->role_id == 3) {

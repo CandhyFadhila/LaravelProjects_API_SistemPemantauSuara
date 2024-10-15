@@ -617,7 +617,7 @@ class PublikRequestController extends Controller
                 return AktivitasPelaksana::orderBy('created_at', 'desc')->get();
             } elseif ($loggedInUser->role_id == 2) {
                 return AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
-                    $query->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+                    $query->where('role_id', [2, 3])->where('pj_pelaksana', $loggedInUser->id);
                 })->orderBy('created_at', 'desc')->get();
             } elseif ($loggedInUser->role_id == 3) {
                 return AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc')->get();
