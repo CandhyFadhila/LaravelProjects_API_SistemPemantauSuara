@@ -13,7 +13,6 @@ use App\Models\StatusAktivitas;
 use App\Models\StatusAktivitasRw;
 use App\Models\AktivitasPelaksana;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -23,13 +22,28 @@ use App\Http\Resources\public\WithoutDataResource;
 
 class PublikRequestController extends Controller
 {
+    protected $loggedInUser;
+    protected $keyTags;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->loggedInUser = Auth::user();
+            if ($this->loggedInUser) {
+                $this->keyTags = $this->loggedInUser->id;
+            } else {
+                $this->keyTags = 'guest';
+            }
+            return $next($request);
+        });
+    }
+
     public function getAllDataRole()
     {
         if (!Gate::allows('view publikRequest')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = Auth::user();
         $roles = Role::orderBy('created_at', 'desc')->get();
         if ($roles->isEmpty()) {
             return response()->json([
@@ -39,7 +53,7 @@ class PublikRequestController extends Controller
             ], Response::HTTP_OK);
         }
 
-        if ($loggedInUser->nama !== 'Super Admin') {
+        if ($this->loggedInUser->nama !== 'Super Admin') {
             $roles = $roles->filter(function ($role) {
                 return $role->name !== 'Super Admin';
             });
@@ -80,7 +94,7 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $status_rw = Cache::tags(['status_aktivitas_rws'])->rememberForever('get_all_status_aktivitas_rws', function () {
+        $status_rw = Cache::tags(['status_aktivitas_rws'])->rememberForever('public_get_all_status_aktivitas_rws_' . $this->keyTags, function () {
             return StatusAktivitasRw::orderBy('created_at', 'desc')->get();
         });
         if ($status_rw->isEmpty()) {
@@ -130,8 +144,8 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = auth()->user();
-        $cacheKey = 'get_all_users';
+        $loggedInUser = $this->loggedInUser;
+        $cacheKey = 'public_get_all_users_' . $this->keyTags;
 
         $users = Cache::tags(['users'])->rememberForever($cacheKey, function () use ($loggedInUser) {
             // Super Admin (role_id = 1), mendapatkan semua pengguna
@@ -265,12 +279,12 @@ class PublikRequestController extends Controller
 
     public function getAllUserbyPenggerak()
     {
-        $loggedInUser = auth()->user();
+        $loggedInUser = $this->loggedInUser;
         if (!in_array($loggedInUser->role_id, [1, 2])) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $cacheKey = 'user_by_penggerak_' . $loggedInUser->role_id;
+        $cacheKey = 'public_user_by_penggerak_' . $this->keyTags;
 
         $users = Cache::tags(['users'])->rememberForever($cacheKey, function () use ($loggedInUser) {
             // Super Admin (role_id = 1), mendapatkan semua pengguna
@@ -522,7 +536,7 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $kelurahan = Cache::tags(['kelurahans'])->rememberForever('get_all_kelurahan', function () {
+        $kelurahan = Cache::tags(['kelurahans'])->rememberForever('public_get_all_kelurahan_' . $this->keyTags, function () {
             return Kelurahan::all();
         });
         if ($kelurahan->isEmpty()) {
@@ -609,15 +623,17 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = auth()->user();
-        $cacheKey = 'get_all_aktivitas';
+        $loggedInUser = $this->loggedInUser;
+        $cacheKey = 'public_get_all_aktivitas_' . $this->keyTags;
 
         $aktivitas = Cache::tags(['aktivitas'])->rememberForever($cacheKey, function () use ($loggedInUser) {
             if ($loggedInUser->role_id == 1) {
                 return AktivitasPelaksana::orderBy('created_at', 'desc')->get();
             } elseif ($loggedInUser->role_id == 2) {
-                return AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
-                    $query->where('role_id', [2, 3])->where('pj_pelaksana', $loggedInUser->id);
+                return AktivitasPelaksana::where(function ($query) use ($loggedInUser) {
+                    $query->whereHas('pelaksana_users', function ($subQuery) use ($loggedInUser) {
+                        $subQuery->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+                    })->orWhere('pelaksana', $loggedInUser->id);
                 })->orderBy('created_at', 'desc')->get();
             } elseif ($loggedInUser->role_id == 3) {
                 return AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc')->get();
@@ -715,7 +731,7 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $suara_kpu = Cache::tags(['suara_kpus'])->rememberForever('get_all_suara_kpu', function () {
+        $suara_kpu = Cache::tags(['suara_kpus'])->rememberForever('public_get_all_suara_kpu_' . $this->keyTags, function () {
             return SuaraKPU::orderBy('created_at', 'desc')->get();
         });
         if ($suara_kpu->isEmpty()) {
@@ -773,7 +789,7 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $prakiraan_tps = Cache::tags(['upcoming_tps'])->rememberForever('get_all_data_upcoming_tps', function () {
+        $prakiraan_tps = Cache::tags(['upcoming_tps'])->rememberForever('public_get_all_data_upcoming_tps_' . $this->keyTags, function () {
             return UpcomingTps::orderBy('created_at', 'desc')->get();
         });
         if ($prakiraan_tps->isEmpty()) {
@@ -818,8 +834,7 @@ class PublikRequestController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = Auth::user();
-        // dd($loggedInUser->kelurahan_id);
+        $loggedInUser = $this->loggedInUser;
 
         $kategori_suara = $request->input('kategori_suara', []);
         $tahun = $request->input('tahun', []);
@@ -831,8 +846,15 @@ class PublikRequestController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $kelurahan = Cache::tags(['kelurahans'])->rememberForever('get_all_kelurahan', function () use ($loggedInUser) {
-            return Kelurahan::whereIn('id', $loggedInUser->kelurahan_id)->get();
+        $cacheKey = 'public_get_all_kelurahan_' . $this->keyTags;
+        $kelurahan = Cache::tags(['kelurahans'])->rememberForever($cacheKey, function () use ($loggedInUser) {
+            if ($loggedInUser->role_id == 1) {
+                return Kelurahan::all();
+            }
+            if ($loggedInUser->kelurahan_id && !empty($loggedInUser->kelurahan_id)) {
+                return Kelurahan::whereIn('id', $loggedInUser->kelurahan_id)->get();
+            }
+            return collect();
         });
         if ($kelurahan->isEmpty()) {
             return response()->json([
@@ -842,7 +864,7 @@ class PublikRequestController extends Controller
             ], Response::HTTP_OK);
         }
 
-        $statusAktivitasRw = Cache::tags(['status_aktivitas_rw'])->rememberForever('get_all_status_aktivitas_rws_kelurahan', function () use ($kelurahan) {
+        $statusAktivitasRw = Cache::tags(['status_aktivitas_rw'])->rememberForever('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags, function () use ($kelurahan) {
             return StatusAktivitasRw::whereIn('kelurahan_id', $kelurahan->pluck('id'))
                 ->with('aktivitas_status')
                 ->get();
@@ -864,7 +886,7 @@ class PublikRequestController extends Controller
             //     ->get();
 
             // $cacheKey = 'suara_kpu_' . $kelurahan->kode_kelurahan . '_' . implode('_', $tahun) . '_' . implode('_', $kategori_suara);
-            $cacheKey = 'suara_kpu_' . $kelurahan->kode_kelurahan;
+            $cacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
             // dd($cacheKey);
             $suara_kpu = Cache::tags(['suara_kpus'])->rememberForever($cacheKey, function () use ($kelurahan, $tahun, $kategori_suara) {
                 return SuaraKPU::where('kelurahan_id', $kelurahan->id)

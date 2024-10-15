@@ -187,8 +187,7 @@ class LoginController extends Controller
         auth()->guard('web')->logout();
         $deleteCookie = Cookie::forget('authToken');
 
-        $userId = auth()->user();
-        Log::info("Logout successful for user ID: {$userId->id}, Name: {$userId->nama}.");
+        Log::info("Logout successful for user ID: {$user->id}, Name: {$user->nama}.");
 
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Anda berhasil melakukan logout.'), Response::HTTP_OK)->withCookie($deleteCookie);
     }

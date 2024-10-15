@@ -25,26 +25,42 @@ use App\Http\Requests\Pengguna\UpdatePenggunaRequest;
 
 class PenggunaController extends Controller
 {
+    protected $loggedInUser;
+    protected $keyTags;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->loggedInUser = Auth::user();
+            if ($this->loggedInUser) {
+                $this->keyTags = $this->loggedInUser->id;
+            } else {
+                $this->keyTags = 'guest';
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         if (!Gate::allows('view pengguna')) {
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = auth()->user();
+        $loggedInUser = $this->loggedInUser;
         $limit = $request->input('limit', 10);
         $cacheTag = 'users';
 
         if ($loggedInUser->role_id == 1) {
             $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
-            $cacheKey = 'user_role_1';
+            $cacheKey = 'user_role_1_' . $this->keyTags;
         } elseif ($loggedInUser->role_id == 2) {
             $query = User::query()
                 ->where('role_id', 3)
                 ->where('status_aktif', 2)
                 ->where('pj_pelaksana', $loggedInUser->id)
                 ->orderBy('created_at', 'desc');
-            $cacheKey = 'user_role_2';
+            $cacheKey = 'user_role_2_' . $this->keyTags;
         } else {
             return response()->json([
                 'status' => Response::HTTP_FORBIDDEN,
@@ -198,7 +214,7 @@ class PenggunaController extends Controller
 
         $data = $request->validated();
 
-        $loggedInUser = Auth::user();
+        $loggedInUser = $this->loggedInUser;
 
         // Validasi role_id = 1 hanya bisa membuat role_id = 2
         if ($loggedInUser->role_id == 1 && $data['role_id'] != 2) {
@@ -419,7 +435,7 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = Auth::user();
+        $loggedInUser = $this->loggedInUser;
         $user = User::findOrFail($id);
 
         if ($loggedInUser->role_id == 1 && $user->role_id != 2) {
@@ -485,6 +501,8 @@ class PenggunaController extends Controller
         }
 
         $user->save();
+
+        Cache::tags('users')->flush();
 
         return response()->json([
             'status' => Response::HTTP_OK,
@@ -575,7 +593,7 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $user = Auth::user();
+        $user = $this->loggedInUser;
         $data = $request->validated();
         if (isset($data['password'])) {
             $currentPassword = $request->input('current_password');
@@ -596,7 +614,7 @@ class PenggunaController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
         }
 
-        $loggedInUser = auth()->user();
+        $loggedInUser = $this->loggedInUser;
 
         $data_pengguna = User::all();
         if ($data_pengguna->isEmpty()) {

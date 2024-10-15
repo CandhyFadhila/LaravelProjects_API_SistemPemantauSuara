@@ -26,6 +26,22 @@ use App\Http\Requests\Aktivitas\UpdateAktivitasPelaksanaRequest;
 
 class AktivitasController extends Controller
 {
+    protected $loggedInUser;
+    protected $keyTags;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->loggedInUser = Auth::user();
+            if ($this->loggedInUser) {
+                $this->keyTags = $this->loggedInUser->id;
+            } else {
+                $this->keyTags = 'guest';
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         if (!Gate::allows('view aktivitas')) {
@@ -33,20 +49,22 @@ class AktivitasController extends Controller
         }
 
         $limit = $request->input('limit', 10);
-        $loggedInUser = auth()->user();
+        $loggedInUser = $this->loggedInUser;
         $cacheTag = 'aktivitas';
 
         if ($loggedInUser->role_id == 1) {
             $aktivitas_pelaksana = AktivitasPelaksana::query()->orderBy('created_at', 'desc');
-            $cacheKey = 'aktivitas_role_1';
+            $cacheKey = 'aktivitas_role_1_' . $this->keyTags;
         } elseif ($loggedInUser->role_id == 2) {
-            $aktivitas_pelaksana = AktivitasPelaksana::whereHas('pelaksana_users', function ($query) use ($loggedInUser) {
-                $query->where('role_id', [2, 3])->where('pj_pelaksana', $loggedInUser->id);
+            $aktivitas_pelaksana = AktivitasPelaksana::where(function ($query) use ($loggedInUser) {
+                $query->whereHas('pelaksana_users', function ($subQuery) use ($loggedInUser) {
+                    $subQuery->where('role_id', 3)->where('pj_pelaksana', $loggedInUser->id);
+                })->orWhere('pelaksana', $loggedInUser->id);
             })->orderBy('created_at', 'desc');
-            $cacheKey = 'aktivitas_role_2';
+            $cacheKey = 'aktivitas_role_2_' . $this->keyTags;
         } elseif ($loggedInUser->role_id == 3) {
             $aktivitas_pelaksana = AktivitasPelaksana::where('pelaksana', $loggedInUser->id)->orderBy('created_at', 'desc');
-            $cacheKey = 'aktivitas_role_3';
+            $cacheKey = 'aktivitas_role_3_' . $this->keyTags;
         } else {
             return response()->json([
                 'status' => Response::HTTP_FORBIDDEN,
@@ -312,7 +330,7 @@ class AktivitasController extends Controller
 
         // dan tampilkan didalam fungsi indexSuaraKPU bebarengan dengan aktivitas
 
-        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws', 'status_aktivitas_rw'])->flush();
+        Cache::tags(['aktivitas', 'status_aktivitas_rw', 'upcoming_tps'])->flush();
 
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
@@ -506,6 +524,7 @@ class AktivitasController extends Controller
         }
 
         $aktivitas->save();
+        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws', 'status_aktivitas_rw'])->flush();
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
             'status' => Response::HTTP_OK,
