@@ -29,7 +29,8 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
         }
         if ($this->User->role_id == 2) {
             return $query->whereHas('pelaksana_users', function ($q) {
-                $q->where('role_id', 3)->where('pj_pelaksana', $this->User->id);
+                $q->where('role_id', 3)->where('pj_pelaksana', $this->User->id)
+                    ->orWhere('pelaksana', $this->User->id);
             })->orderBy('tgl_mulai', 'asc')->get();
         }
         if ($this->User->role_id == 3) {
@@ -53,7 +54,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             'rw',
             'kelurahan',
             'kecamatan',
-            // 'status_aktivitas',
+            'status_aktivitas',
             'potensi_suara',
             'terakhir_dibuat',
             'terakhir_diperbarui'
@@ -80,7 +81,7 @@ class AktivitasExport implements FromCollection, WithHeadings, WithMapping
             $aktivitas->rw,
             $aktivitas->kelurahans ? $aktivitas->kelurahans->nama_kelurahan : 'N/A',
             $aktivitas->kelurahans->kecamatans ? $aktivitas->kelurahans->kecamatans->nama_kecamatan : 'N/A',
-            // $aktivitas->status ? $aktivitas->status->label : 'N/A',
+            $aktivitas->status ? $aktivitas->status->label : 'N/A',
             $aktivitas->potensi_suara ?? 'N/A',
             $aktivitas->created_at,
             $aktivitas->updated_at
