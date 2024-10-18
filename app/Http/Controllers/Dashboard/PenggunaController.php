@@ -49,7 +49,6 @@ class PenggunaController extends Controller
 
         $loggedInUser = $this->loggedInUser;
         $limit = $request->input('limit', 10);
-        $cacheTag = 'users';
 
         if ($loggedInUser->role_id == 1) {
             $query = User::query()->where('id', '!=', 1)->orderBy('created_at', 'desc');
@@ -71,7 +70,7 @@ class PenggunaController extends Controller
         $filters = $request->all();
         $query = UserFilterHelper::applyFiltersUser($query, $filters);
 
-        $users = Cache::tags([$cacheTag])->rememberForever($cacheKey, function () use ($query) {
+        $users = Cache::rememberForever($cacheKey, function () use ($query) {
             return $query->get();
         });
 
@@ -309,7 +308,8 @@ class PenggunaController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        Cache::tags('users')->flush();
+        Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
 
         return response()->json([
             'status' => Response::HTTP_CREATED,
@@ -502,7 +502,8 @@ class PenggunaController extends Controller
 
         $user->save();
 
-        Cache::tags('users')->flush();
+        Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
 
         return response()->json([
             'status' => Response::HTTP_OK,
@@ -533,6 +534,9 @@ class PenggunaController extends Controller
             $message = "Pengguna '{$user->nama}' berhasil diaktifkan kembali.";
         }
         $user->save();
+
+        Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
 
         if ($user->role_id == 2 && $user->status_aktif === 3) {
             $penggerakUsers = User::where('role_id', 3)->where('pj_pelaksana', $user->id)->get();
@@ -580,6 +584,9 @@ class PenggunaController extends Controller
         $user->password = Hash::make($newPassword);
         $user->save();
 
+        Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
+
         return response()->json([
             'status' => Response::HTTP_OK,
             'message' => "Berhasil melakukan reset password untuk pengguna '{$user->nama}'.",
@@ -605,6 +612,8 @@ class PenggunaController extends Controller
         }
         /** @var \App\Models\User $user **/
         $user->fill($data)->save();
+        Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berhasil memperbarui kata sandi anda.'), Response::HTTP_OK);
     }
 

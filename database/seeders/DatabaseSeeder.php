@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             KecamatanSeeder::class,
             KelurahanSeeder::class,
 
-            UserSeeder::class,
+            // UserSeeder::class,
 
             PartaiSeeder::class,
             // SuaraKPUSeeder::class,

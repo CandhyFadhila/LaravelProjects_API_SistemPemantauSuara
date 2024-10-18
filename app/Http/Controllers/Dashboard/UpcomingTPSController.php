@@ -7,14 +7,31 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\KPU\StoreUpcomingTPSRequest;
 use App\Http\Resources\public\WithoutDataResource;
 use App\Http\Requests\KPU\UpdateUpcomingTPSRequest;
-use Illuminate\Support\Facades\Cache;
 
 class UpcomingTPSController extends Controller
 {
+    protected $loggedInUser;
+    protected $keyTags;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->loggedInUser = Auth::user();
+            if ($this->loggedInUser) {
+                $this->keyTags = $this->loggedInUser->id;
+            } else {
+                $this->keyTags = 'guest';
+            }
+            return $next($request);
+        });
+    }
+
     public function store(StoreUpcomingTPSRequest $request)
     {
         try {
@@ -30,7 +47,7 @@ class UpcomingTPSController extends Controller
                 'jumlah_tps' => $validatedData['jumlah_tps'],
             ]);
 
-            Cache::tags('upcoming_tps')->flush();
+            Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
 
             return response()->json([
                 'status' => Response::HTTP_CREATED,
@@ -117,6 +134,8 @@ class UpcomingTPSController extends Controller
             $upcomingTPS->jumlah_tps = $validatedData['jumlah_tps'] ?? $upcomingTPS->jumlah_tps;
             $upcomingTPS->save();
 
+            Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
+
             return response()->json([
                 'status' => Response::HTTP_OK,
                 'message' => "Data TPS mendatang untuk kelurahan '{$upcomingTPS->kelurahans->nama_kelurahan}' di tahun '{$upcomingTPS->tahun}' berhasil diperbarui.",
@@ -147,6 +166,8 @@ class UpcomingTPSController extends Controller
             }
 
             $upcomingTPS->delete();
+
+            Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
 
             return response()->json([
                 'status' => Response::HTTP_OK,

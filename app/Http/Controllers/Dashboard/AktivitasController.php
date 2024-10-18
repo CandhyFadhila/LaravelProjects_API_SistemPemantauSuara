@@ -50,7 +50,6 @@ class AktivitasController extends Controller
 
         $limit = $request->input('limit', 10);
         $loggedInUser = $this->loggedInUser;
-        $cacheTag = 'aktivitas';
 
         if ($loggedInUser->role_id == 1) {
             $aktivitas_pelaksana = AktivitasPelaksana::query()->orderBy('created_at', 'desc');
@@ -75,7 +74,7 @@ class AktivitasController extends Controller
         $filters = $request->all();
         $aktivitas = AktivitasFilterHelper::applyFiltersAktivitas($aktivitas_pelaksana, $filters);
 
-        $data_aktivitas = Cache::tags([$cacheTag])->rememberForever($cacheKey, function () use ($aktivitas_pelaksana) {
+        $data_aktivitas = Cache::rememberForever($cacheKey, function () use ($aktivitas_pelaksana) {
             return $aktivitas_pelaksana->get();
         });
 
@@ -324,13 +323,12 @@ class AktivitasController extends Controller
             'status_aktivitas_rw' => $statusAktivitasRw->id
         ]);
 
-        // setelah create aktivitas, langsung create status_aktivitas_rws (samakan untuk kelurahan id dan status aktivitas) dan isi status_aktivitas_rw (ditabel aktivitas - method update) dengan id status_aktivitas_rws
-
-        // jika case create aktivitas dengan kelurahan id dan rw yang sama, maka tetap create aktivitas dan lakukan update status_aktivitas_rws dengan status_aktivitas yang baru 
-
-        // dan tampilkan didalam fungsi indexSuaraKPU bebarengan dengan aktivitas
-
-        Cache::tags(['aktivitas', 'status_aktivitas_rw', 'upcoming_tps'])->flush();
+        Cache::forget('public_get_all_aktivitas_' . $this->keyTags);
+        Cache::forget('aktivitas_role_1_' . $this->keyTags);
+        Cache::forget('aktivitas_role_2_' . $this->keyTags);
+        Cache::forget('aktivitas_role_3_' . $this->keyTags);
+        Cache::forget('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags);
+        Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
 
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
@@ -524,7 +522,14 @@ class AktivitasController extends Controller
         }
 
         $aktivitas->save();
-        Cache::tags(['aktivitas', 'get_all_status_aktivitas_rws', 'status_aktivitas_rw'])->flush();
+
+        Cache::forget('public_get_all_aktivitas_' . $this->keyTags);
+        Cache::forget('aktivitas_role_1_' . $this->keyTags);
+        Cache::forget('aktivitas_role_2_' . $this->keyTags);
+        Cache::forget('aktivitas_role_3_' . $this->keyTags);
+        Cache::forget('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags);
+        Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
+
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
             'status' => Response::HTTP_OK,

@@ -10,6 +10,7 @@ use App\Exports\KPU\SuaraKPUExport;
 use App\Imports\KPU\SuaraKPUImport;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Cache;
@@ -18,6 +19,22 @@ use App\Http\Resources\public\WithoutDataResource;
 
 class SuaraKPUController extends Controller
 {
+    protected $loggedInUser;
+    protected $keyTags;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->loggedInUser = Auth::user();
+            if ($this->loggedInUser) {
+                $this->keyTags = $this->loggedInUser->id;
+            } else {
+                $this->keyTags = 'guest';
+            }
+            return $next($request);
+        });
+    }
+
     public function exportKPU(Request $request)
     {
         try {
@@ -53,12 +70,24 @@ class SuaraKPUController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
+            $loggedInUser = $this->loggedInUser;
+
             $file = $request->validated();
+
+            if ($loggedInUser->role_id == 1) {
+                $kelurahan = Kelurahan::all();
+            }
+            if ($loggedInUser->kelurahan_id && !empty($loggedInUser->kelurahan_id)) {
+                $kelurahan = Kelurahan::whereIn('id', $loggedInUser->kelurahan_id)->get();
+            }
 
             try {
                 ini_set('max_execution_time', 500);
                 Excel::import(new SuaraKPUImport, $file['kpu_file']);
-                Cache::tags(['suara_kpus'])->flush();
+
+                foreach ($kelurahan as $kel) {
+                    Cache::forget('public_suara_kpu_' . $this->keyTags . '_' . $kel->kode_kelurahan);
+                }
             } catch (\Exception $e) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Maaf sepertinya terjadi kesalahan.' . $e->getMessage()), Response::HTTP_NOT_ACCEPTABLE);
             }
