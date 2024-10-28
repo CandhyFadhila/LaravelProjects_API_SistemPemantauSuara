@@ -323,13 +323,6 @@ class AktivitasController extends Controller
             'status_aktivitas_rw' => $statusAktivitasRw->id
         ]);
 
-        Cache::forget('public_get_all_aktivitas_' . $this->keyTags);
-        Cache::forget('aktivitas_role_1_' . $this->keyTags);
-        Cache::forget('aktivitas_role_2_' . $this->keyTags);
-        Cache::forget('aktivitas_role_3_' . $this->keyTags);
-        Cache::forget('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags);
-        Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
-
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
             'status' => Response::HTTP_CREATED,
@@ -523,13 +516,6 @@ class AktivitasController extends Controller
 
         $aktivitas->save();
 
-        Cache::forget('public_get_all_aktivitas_' . $this->keyTags);
-        Cache::forget('aktivitas_role_1_' . $this->keyTags);
-        Cache::forget('aktivitas_role_2_' . $this->keyTags);
-        Cache::forget('aktivitas_role_3_' . $this->keyTags);
-        Cache::forget('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags);
-        Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
-
         $tanggal_aktivitas = DateHelper::convertToDMY($aktivitas->tgl_mulai);
         return response()->json([
             'status' => Response::HTTP_OK,
@@ -592,6 +578,12 @@ class AktivitasController extends Controller
 
             try {
                 Excel::import(new AktivitasImport, $file['aktivitas_file']);
+                Cache::forget('public_get_all_aktivitas_' . $this->keyTags);
+                Cache::forget('aktivitas_role_1_' . $this->keyTags);
+                Cache::forget('aktivitas_role_2_' . $this->keyTags);
+                Cache::forget('aktivitas_role_3_' . $this->keyTags);
+                Cache::forget('public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags);
+                Cache::forget('public_get_all_data_upcoming_tps_' . $this->keyTags);
             } catch (\Exception $e) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Maaf sepertinya terjadi kesalahan.' . $e->getMessage()), Response::HTTP_NOT_ACCEPTABLE);
             }

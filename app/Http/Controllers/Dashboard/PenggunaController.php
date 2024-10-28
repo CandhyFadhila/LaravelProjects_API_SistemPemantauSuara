@@ -308,9 +308,6 @@ class PenggunaController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        Cache::forget('public_get_all_users_' . $this->keyTags);
-        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
-
         return response()->json([
             'status' => Response::HTTP_CREATED,
             'message' => "Pengguna baru '{$createUser->nama}' berhasil ditambahkan."
@@ -502,9 +499,6 @@ class PenggunaController extends Controller
 
         $user->save();
 
-        Cache::forget('public_get_all_users_' . $this->keyTags);
-        Cache::forget('public_user_by_penggerak_' . $this->keyTags);
-
         return response()->json([
             'status' => Response::HTTP_OK,
             'message' => "Data pengguna '{$user->nama}' berhasil diperbarui."
@@ -536,6 +530,8 @@ class PenggunaController extends Controller
         $user->save();
 
         Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('user_role_1_' . $this->keyTags);
+        Cache::forget('user_role_2_' . $this->keyTags);
         Cache::forget('public_user_by_penggerak_' . $this->keyTags);
 
         if ($user->role_id == 2 && $user->status_aktif === 3) {
@@ -585,6 +581,8 @@ class PenggunaController extends Controller
         $user->save();
 
         Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('user_role_1_' . $this->keyTags);
+        Cache::forget('user_role_2_' . $this->keyTags);
         Cache::forget('public_user_by_penggerak_' . $this->keyTags);
 
         return response()->json([
@@ -613,6 +611,8 @@ class PenggunaController extends Controller
         /** @var \App\Models\User $user **/
         $user->fill($data)->save();
         Cache::forget('public_get_all_users_' . $this->keyTags);
+        Cache::forget('user_role_1_' . $this->keyTags);
+        Cache::forget('user_role_2_' . $this->keyTags);
         Cache::forget('public_user_by_penggerak_' . $this->keyTags);
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berhasil memperbarui kata sandi anda.'), Response::HTTP_OK);
     }
