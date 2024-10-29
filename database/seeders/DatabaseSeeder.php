@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
 
             StatusAktivitasSeeder::class,
             // AktivitasPelaksanaSeeder::class,
+            PaslonSeeder::class
         ]);
     }
 }

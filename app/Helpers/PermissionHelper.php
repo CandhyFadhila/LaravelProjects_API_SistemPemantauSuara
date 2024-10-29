@@ -38,7 +38,15 @@ class PermissionHelper
 				'delete upcomingTPS',
 				'view upcomingTPS',
 				// 'import upcomingTPS',
-				// 'export upcomingTPS'
+				// 'export upcomingTPS',
+
+				'create quickCount',
+				'edit quickCount',
+				'view quickCount',
+
+				'create paslon',
+				'edit paslon',
+				'view paslon',
 			],
 			2 => [
 				'view publikRequest',
@@ -64,6 +72,11 @@ class PermissionHelper
 				'edit upcomingTPS',
 				'delete upcomingTPS',
 				'view upcomingTPS',
+
+				'edit quickCount', // quick count
+				'view quickCount',
+
+				'view paslon',
 			],
 			3 => [
 				'view publikRequest',
@@ -83,6 +96,11 @@ class PermissionHelper
 				'edit upcomingTPS',
 				'delete upcomingTPS',
 				'view upcomingTPS',
+
+				'edit quickCount', // quick count
+				'view quickCount',
+
+				'view paslon',
 			]
 		];
 

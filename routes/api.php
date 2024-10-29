@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Dashboard\AktivitasController;
+use App\Http\Controllers\Dashboard\Counting\QuickCountController;
 use App\Http\Controllers\Dashboard\DetailMapController;
+use App\Http\Controllers\Dashboard\PasanganCalonController;
 use App\Http\Controllers\Dashboard\PenggunaController;
 use App\Http\Controllers\Dashboard\SuaraKPUController;
 use App\Http\Controllers\Dashboard\UpcomingTPSController;
@@ -31,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ! Publik Request
     Route::prefix('pemantau-suara/publik-request')->group(function () {
+        Route::get('/get-all-paslon', [PublikRequestController::class, 'getDataPasanganCalon']);
         Route::get('/get-all-users', [PublikRequestController::class, 'getAllDataUser']);
         Route::get('/get-all-users-penggerak', [PublikRequestController::class, 'getAllUserbyPenggerak']);
         Route::get('/get-all-roles', [PublikRequestController::class, 'getAllDataRole']);
@@ -77,6 +80,18 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/suara-kpu', [DetailMapController::class, 'indexSuaraKPU']);
             Route::get('/suara-kpu-export', [SuaraKPUController::class, 'exportKPU']);
             Route::post('/suara-kpu-import', [SuaraKPUController::class, 'importKPU']);
+        });
+
+        // ! Quick Count
+        Route::prefix('counting')->group(function () {
+            Route::post('/get-quick-count', [QuickCountController::class, 'index']);
+            Route::apiResource('/quick-count', QuickCountController::class);
+        });
+
+        // ! Pasangan Calon
+        Route::prefix('pasangan-calon')->group(function () {
+            Route::post('/get-kandidat', [PasanganCalonController::class, 'index']);
+            Route::apiResource('/kandidat', PasanganCalonController::class);
         });
     });
 });

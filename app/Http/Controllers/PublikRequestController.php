@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\StatusAktivitasHelper;
 use App\Http\Resources\public\WithoutDataResource;
+use App\Models\PasanganCalon;
 
 class PublikRequestController extends Controller
 {
@@ -937,5 +938,43 @@ class PublikRequestController extends Controller
             'message' => 'Retrieving all kelurahans with kpus',
             'data' => $formattedData
         ]);
+    }
+
+    public function getDataPasanganCalon()
+    {
+        if (!Gate::allows('view publikRequest')) {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
+        }
+
+        $paslon = PasanganCalon::orderBy('created_at', 'desc')->get();
+        if ($paslon->isEmpty()) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data pasangan calon tidak ditemukan.',
+                'data' => []
+            ], Response::HTTP_OK);
+        }
+
+        $formattedData = $paslon->map(function ($paslon) {
+            return [
+                'id' => $paslon->id,
+                'nama' => $paslon->nama,
+                'partai' => $paslon->partai ? [
+                    'id' => $paslon->partai->id,
+                    'nama' => $paslon->partai->nama,
+                    'color' => $paslon->partai->color,
+                    'created_at' => $paslon->partai->created_at,
+                    'updated_at' => $paslon->partai->updated_at
+                ] : null,
+                'created_at' => $paslon->created_at,
+                'updated_at' => $paslon->updated_at
+            ];
+        });
+
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'message' => 'Retrieving all pasangan calon',
+            'data' => $formattedData
+        ], Response::HTTP_OK);
     }
 }

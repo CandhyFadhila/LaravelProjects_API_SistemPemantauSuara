@@ -19,6 +19,8 @@ class PermissionSeeder extends Seeder
             'Manajemen KPU' => ['create suaraKPU', 'edit suaraKPU', 'delete suaraKPU', 'view suaraKPU', 'import suaraKPU', 'export suaraKPU'],
             'Manajemen TPS' => ['create upcomingTPS', 'edit upcomingTPS', 'delete upcomingTPS', 'view upcomingTPS', 'import upcomingTPS', 'export upcomingTPS'],
             'Publik Request' => ['view publikRequest'],
+            'Quick Count' => ['create quickCount', 'edit quickCount', 'view quickCount'],
+            'Pasangan Calon' => ['create paslon', 'edit paslon', 'view paslon'],
         ];
 
         foreach ($permissions as $group => $perms) {
