@@ -15,7 +15,7 @@ class StatusAktivitasHelper
 			return [
 				"id" => null,
 				"label" => null,
-				"color" => "F0F0F0",
+				"color" => "FAFAFA",
 				"created_at" => null,
 				"updated_at" => null
 			];
@@ -76,11 +76,22 @@ class StatusAktivitasHelper
 				return [
 					"id" => null,
 					"label" => null,
-					"color" => "F0F0F0",
+					"color" => "FAFAFA",
 					"created_at" => null,
 					"updated_at" => null
 				];
 			}
 		}, $rwList);
+	}
+
+	public static function GetNullStatusForKategoriSuara()
+	{
+		return [
+			"id" => null,
+			"label" => null,
+			"color" => null,
+			"created_at" => null,
+			"updated_at" => null
+		];
 	}
 }

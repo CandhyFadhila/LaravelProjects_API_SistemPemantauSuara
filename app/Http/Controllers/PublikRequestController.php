@@ -898,7 +898,8 @@ class PublikRequestController extends Controller
                     $list_rw[$status->rw - 1] = $status->status_aktivitas;
                 }
             }
-            $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
+            // $status_aktivitas_kelurahan = StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
+            $status_aktivitas_kelurahan = in_array(2, $kategori_suara) ? StatusAktivitasHelper::GetNullStatusForKategoriSuara() : StatusAktivitasHelper::DetermineStatusAktivitasKelurahan($list_rw);
 
             $cacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
             $suara_kpu = Cache::rememberForever($cacheKey, function () use ($kelurahan, $tahun, $kategori_suara) {

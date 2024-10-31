@@ -24,8 +24,18 @@ class DetailMapController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak memiliki hak akses untuk melakukan proses ini.'), Response::HTTP_FORBIDDEN);
             }
 
+            $kategori_suara = $request->input('kategori_suara', []); // 2 PILEG
             $kode_kelurahan = $request->input('kode_kelurahan', []);
             $tahun = $request->input('tahun', []);
+
+            if (in_array(2, $kategori_suara)) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data aktivitas dan potensi suara tidak ditemukan untuk kategori suara yang dipilih.',
+                    'data' => null
+                ], Response::HTTP_OK);
+            }
+
             if (empty($kode_kelurahan) || empty($tahun)) {
                 return response()->json([
                     'status' => Response::HTTP_BAD_REQUEST,

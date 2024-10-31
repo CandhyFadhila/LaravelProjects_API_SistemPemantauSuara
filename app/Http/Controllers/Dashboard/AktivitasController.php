@@ -147,19 +147,19 @@ class AktivitasController extends Controller
                     'created_at' => $pjPelaksana->roles->first()->created_at,
                     'updated_at' => $pjPelaksana->roles->first()->updated_at,
                 ] : null,
-                'kelurahan' => $pjPelaksana->kelurahan_id ? Kelurahan::whereIn('id', $pjPelaksana->kelurahan_id)->get()->map(function ($kelurahan) {
-                    return [
-                        'id' => $kelurahan->id,
-                        'nama_kelurahan' => $kelurahan->nama_kelurahan,
-                        'kode_kelurahan' => $kelurahan->kode_kelurahan,
-                        'max_rw' => $kelurahan->max_rw,
-                        'provinsi' => $kelurahan->provinsis,
-                        'kabupaten' => $kelurahan->kabupaten_kotas,
-                        'kecamatan' => $kelurahan->kecamatans,
-                        'created_at' => $kelurahan->created_at,
-                        'updated_at' => $kelurahan->updated_at
-                    ];
-                }) : null,
+                // 'kelurahan' => $pjPelaksana->kelurahan_id ? Kelurahan::whereIn('id', $pjPelaksana->kelurahan_id)->get()->map(function ($kelurahan) {
+                //     return [
+                //         'id' => $kelurahan->id,
+                //         'nama_kelurahan' => $kelurahan->nama_kelurahan,
+                //         'kode_kelurahan' => $kelurahan->kode_kelurahan,
+                //         'max_rw' => $kelurahan->max_rw,
+                //         'provinsi' => $kelurahan->provinsis,
+                //         'kabupaten' => $kelurahan->kabupaten_kotas,
+                //         'kecamatan' => $kelurahan->kecamatans,
+                //         'created_at' => $kelurahan->created_at,
+                //         'updated_at' => $kelurahan->updated_at
+                //     ];
+                // }) : null,
                 'rw_pelaksana' => $pjPelaksana->rw_pelaksana ?? null,
                 'status_aktif' => $pjPelaksana->status_users ? [
                     'id' => $pjPelaksana->status_users->id,
@@ -189,7 +189,7 @@ class AktivitasController extends Controller
                         'updated_at' => $role->updated_at,
                     ] : null,
                     'status_aktif' => $pelaksana->status_aktif,
-                    'kelurahan' => $kelurahanData,
+                    // 'kelurahan' => $kelurahanData,
                     'rw_pelaksana' => $pelaksana->rw_pelaksana ?? null,
                     'pj_pelaksana' => $pjPelaksanaData,
                     'created_at' => $aktivitas->pelaksana_users->created_at,
@@ -201,17 +201,17 @@ class AktivitasController extends Controller
                 'tempat_aktivitas' => $aktivitas->tempat_aktivitas,
                 'foto_aktivitas' => $aktivitas->foto_aktivitas ? env('STORAGE_SERVER_DOMAIN') . $aktivitas->foto_aktivitas : null,
                 'rw' => $aktivitas->rw,
-                'kelurahan' => $aktivitas->kelurahans ? [
-                    'id' => $aktivitas->kelurahans->id,
-                    'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
-                    'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
-                    'max_rw' => $aktivitas->kelurahans->max_rw,
-                    'kecamatan' => $aktivitas->kelurahans->kecamatans,
-                    'kabupaten' => $aktivitas->kelurahans->kabupaten_kotas,
-                    'provinsi' => $aktivitas->kelurahans->provinsis,
-                    'created_at' => $aktivitas->kelurahans->created_at,
-                    'updated_at' => $aktivitas->kelurahans->updated_at
-                ] : null,
+                // 'kelurahan' => $aktivitas->kelurahans ? [
+                //     'id' => $aktivitas->kelurahans->id,
+                //     'nama_kelurahan' => $aktivitas->kelurahans->nama_kelurahan,
+                //     'kode_kelurahan' => $aktivitas->kelurahans->kode_kelurahan,
+                //     'max_rw' => $aktivitas->kelurahans->max_rw,
+                //     'kecamatan' => $aktivitas->kelurahans->kecamatans,
+                //     'kabupaten' => $aktivitas->kelurahans->kabupaten_kotas,
+                //     'provinsi' => $aktivitas->kelurahans->provinsis,
+                //     'created_at' => $aktivitas->kelurahans->created_at,
+                //     'updated_at' => $aktivitas->kelurahans->updated_at
+                // ] : null,
                 'potensi_suara' => $aktivitas->potensi_suara,
                 'status_aktivitas' => $aktivitas->status ? [
                     'id' => $aktivitas->status->id,
