@@ -848,8 +848,10 @@ class PublikRequestController extends Controller
         }
 
         $cacheKeyStatusAktivitas = 'public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags;
+        $cacheKeyKelurahan = 'public_get_all_kelurahan_' . $this->keyTags;
         if (in_array(1, $kategori_suara)) {
             Cache::forget($cacheKeyStatusAktivitas);
+            Cache::forget($cacheKeyKelurahan);
             $kelurahanList = Kelurahan::all();
             foreach ($kelurahanList as $kelurahan) {
                 $kelurahanCacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
@@ -857,6 +859,7 @@ class PublikRequestController extends Controller
             }
         } else if (in_array(2, $kategori_suara)) {
             Cache::forget($cacheKeyStatusAktivitas);
+            Cache::forget($cacheKeyKelurahan);
             $kelurahanList = Kelurahan::all();
             foreach ($kelurahanList as $kelurahan) {
                 $kelurahanCacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
