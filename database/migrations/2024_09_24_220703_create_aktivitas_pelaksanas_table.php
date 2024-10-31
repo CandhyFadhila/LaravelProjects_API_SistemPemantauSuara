@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('tempat_aktivitas');
             $table->string('foto_aktivitas')->nullable();
             $table->integer('rw');
-            $table->integer('potensi_suara');
+            $table->integer('potensi_suara')->default(0);
             $table->foreignId('kelurahan')->constrained('kelurahans');
             $table->foreignId('status_aktivitas_rw')->nullable()->constrained('status_aktivitas_rws'); // 1 = Alat Peraga, 2 = Sosialisasi
             $table->timestamps();

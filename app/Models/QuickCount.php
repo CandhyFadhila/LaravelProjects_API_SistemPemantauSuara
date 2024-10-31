@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -16,9 +17,18 @@ class QuickCount extends Model
         'id' => 'integer',
         'pasangan_calon_id' => 'integer',
         'periode' => 'integer',
-        'jumlah_suara' => 'integer',
         'kategori_suara_id' => 'integer',
     ];
+
+    /**
+     * Get all of the save_winners for the QuickCount
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function save_winners(): HasMany
+    {
+        return $this->hasMany(SaveWinner::class, 'quick_count_id', 'id');
+    }
 
     /**
      * Get the paslon that owns the QuickCount

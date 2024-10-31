@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama');
             $table->string('username')->unique();
-            $table->string('nik_ktp', 16);
+            // $table->string('nik_ktp', 16);
+            $table->string('nik_ktp');
             $table->string('foto_profil')->nullable();
             $table->string('no_hp', 50);
             $table->string('tgl_diangkat')->nullable();

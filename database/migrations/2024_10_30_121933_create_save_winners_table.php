@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('quick_counts', function (Blueprint $table) {
+        Schema::create('save_winners', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pasangan_calon_id')->constrained('pasangan_calons');
-            $table->integer('periode'); // tahun
-            $table->foreignId('kategori_suara_id')->constrained('kategori_suaras');
+            $table->foreignId('quick_count_id')->constrained('quick_counts');
+            $table->foreignId('kelurahan_id')->constrained('kelurahans');
+            $table->integer('tps');
+            $table->integer('jumlah_suara')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('quick_counts');
+        Schema::dropIfExists('save_winners');
     }
 };

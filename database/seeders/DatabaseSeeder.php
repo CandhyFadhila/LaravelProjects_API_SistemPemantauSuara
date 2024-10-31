@@ -10,6 +10,7 @@ use Database\Seeders\Account\RoleSeeder;
 use Database\Seeders\Account\StatusAktifSeeder;
 use Database\Seeders\Aktivitas\AktivitasPelaksanaSeeder;
 use Database\Seeders\Aktivitas\StatusAktivitasSeeder;
+use Database\Seeders\Counters\QuickCountSeeder;
 use Database\Seeders\Kategori\KategoriSuaraSeeder;
 use Database\Seeders\Semarang\KabupatenSeeder;
 use Database\Seeders\Semarang\KecamatanSeeder;
@@ -45,7 +46,8 @@ class DatabaseSeeder extends Seeder
 
             StatusAktivitasSeeder::class,
             // AktivitasPelaksanaSeeder::class,
-            PaslonSeeder::class
+            PaslonSeeder::class,
+            QuickCountSeeder::class,
         ]);
     }
 }

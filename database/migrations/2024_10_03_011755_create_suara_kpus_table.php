@@ -21,8 +21,8 @@ return new class extends Migration
             $table->text('cakupan_wilayah')->nullable(); // import
             $table->foreignId('kategori_suara_id')->constrained('kategori_suaras');
             $table->integer('jumlah_suara');
-            $table->integer('dpt_laki');
-            $table->integer('dpt_perempuan');
+            $table->integer('dpt_laki')->nullable();
+            $table->integer('dpt_perempuan')->nullable();
             $table->integer('jumlah_dpt');
             $table->integer('suara_caleg')->nullable();
             $table->integer('suara_partai')->nullable();

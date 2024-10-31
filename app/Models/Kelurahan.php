@@ -90,4 +90,14 @@ class Kelurahan extends Model
     {
         return $this->hasOne(StatusAktivitasRw::class, 'kelurahan_id', 'id');
     }
+
+    /**
+     * Get all of the save_winners for the Kelurahan
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function save_winners(): HasMany
+    {
+        return $this->hasMany(SaveWinner::class, 'kelurahan_id', 'id');
+    }
 }
