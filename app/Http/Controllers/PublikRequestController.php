@@ -8,6 +8,7 @@ use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\UpcomingTps;
 use Illuminate\Http\Request;
+use App\Models\PasanganCalon;
 use Illuminate\Http\Response;
 use App\Models\StatusAktivitas;
 use App\Models\StatusAktivitasRw;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Cache;
 use App\Helpers\StatusAktivitasHelper;
 use App\Http\Resources\public\WithoutDataResource;
-use App\Models\PasanganCalon;
 
 class PublikRequestController extends Controller
 {
@@ -847,6 +847,23 @@ class PublikRequestController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $cacheKeyStatusAktivitas = 'public_get_all_status_aktivitas_rws_kelurahan_' . $this->keyTags;
+        if (in_array(1, $kategori_suara)) {
+            Cache::forget($cacheKeyStatusAktivitas);
+            $kelurahanList = Kelurahan::all();
+            foreach ($kelurahanList as $kelurahan) {
+                $kelurahanCacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
+                Cache::forget($kelurahanCacheKey);
+            }
+        } else if (in_array(2, $kategori_suara)) {
+            Cache::forget($cacheKeyStatusAktivitas);
+            $kelurahanList = Kelurahan::all();
+            foreach ($kelurahanList as $kelurahan) {
+                $kelurahanCacheKey = 'public_suara_kpu_' . $this->keyTags . '_' . $kelurahan->kode_kelurahan;
+                Cache::forget($kelurahanCacheKey);
+            }
+        }
+
         $cacheKey = 'public_get_all_kelurahan_' . $this->keyTags;
         $kelurahan = Cache::rememberForever($cacheKey, function () use ($loggedInUser) {
             if ($loggedInUser->role_id == 1) {
@@ -896,13 +913,37 @@ class PublikRequestController extends Controller
             // dd($suaraKpuByPartai);
 
             // Urutkan partai berdasarkan jumlah suara terbanyak
-            $partaiWithMaxSuara = $suaraKpuByPartai->sortByDesc('jumlah_suara')->first();
+            // $partaiWithMaxSuara = $suaraKpuByPartai->sortByDesc('jumlah_suara')->first();
             // dd($partaiWithMaxSuara);
 
+            // $suara_kpu_terbanyak = null;
+            // if ($partaiWithMaxSuara) {
+            //     // Ambil nama partai dari data suara kpu pertama yang sesuai dengan partai_id terbanyak
+            //     $partai = $suara_kpu->firstWhere('partai_id', $partaiWithMaxSuara['partai_id'])->partais ?? null;
+            //     if ($partai) {
+            //         $suara_kpu_terbanyak = [
+            //             'partai' => [
+            //                 'id' => $partai->id,
+            //                 'nama' => $partai->nama,
+            //                 'color' => $partai->color,
+            //                 'created_at' => $partai->created_at,
+            //                 'updated_at' => $partai->updated_at
+            //             ],
+            //             'jumlah_suara' => $partaiWithMaxSuara['jumlah_suara']
+            //         ];
+            //     }
+            // }
+
+            $partai_pdi = $suaraKpuByPartai->get(4)['jumlah_suara'] ?? 0;
+            $non_pdi = $suaraKpuByPartai->filter(function ($item) {
+                return $item['partai_id'] !== 4;
+            })->sum('jumlah_suara');
+
             $suara_kpu_terbanyak = null;
-            if ($partaiWithMaxSuara) {
-                // Ambil nama partai dari data suara kpu pertama yang sesuai dengan partai_id terbanyak
-                $partai = $suara_kpu->firstWhere('partai_id', $partaiWithMaxSuara['partai_id'])->partais ?? null;
+
+            if ($partai_pdi > $non_pdi) {
+                // Jika partai_id = 4 lebih banyak dari total suara selain partai_id = 4
+                $partai = $suara_kpu->firstWhere('partai_id', 4)->partais ?? null;
                 if ($partai) {
                     $suara_kpu_terbanyak = [
                         'partai' => [
@@ -912,7 +953,22 @@ class PublikRequestController extends Controller
                             'created_at' => $partai->created_at,
                             'updated_at' => $partai->updated_at
                         ],
-                        'jumlah_suara' => $partaiWithMaxSuara['jumlah_suara']
+                        'jumlah_suara' => $partai_pdi
+                    ];
+                }
+            } else {
+                // Jika total suara selain partai_id = 4 lebih banyak
+                $partai = $suara_kpu->firstWhere('partai_id', 1)->partais ?? null;
+                if ($partai) {
+                    $suara_kpu_terbanyak = [
+                        'partai' => [
+                            'id' => $partai->id,
+                            'nama' => $partai->nama,
+                            'color' => $partai->color,
+                            'created_at' => $partai->created_at,
+                            'updated_at' => $partai->updated_at
+                        ],
+                        'jumlah_suara' => $non_pdi
                     ];
                 }
             }
